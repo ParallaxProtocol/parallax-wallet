@@ -1,4 +1,4 @@
-.PHONY: backend tor frontend desktop-deps prlx-gui prlx-gui-package dev clean
+.PHONY: backend tor frontend desktop-deps prlx-gui prlx-gui-package dev e2e clean
 
 SHELL := /bin/bash
 
@@ -88,5 +88,12 @@ dev:
 	cd frontend && npm install
 	cd desktop && npm install && PROFILE=$(PROFILE) npm run dev
 
+# e2e runs the end-to-end tests (e2e/): the real app, built as it is
+# here, each test in a home of its own on the development chain. Pass
+# Playwright's arguments in E2E_ARGS (make e2e E2E_ARGS="tests/send.spec.ts")
+e2e: backend frontend desktop-deps
+	cd desktop && npm run build
+	cd e2e && npm ci && npx playwright test $(E2E_ARGS)
+
 clean:
-	rm -rf build/backend build/package build/tor frontend/dist desktop/dist
+	rm -rf build/backend build/package build/tor frontend/dist desktop/dist e2e/test-results e2e/playwright-report

@@ -71,3 +71,49 @@ jobs:
       - name: Type-check the Electron shell
         working-directory: desktop
         run: npm ci && npm run typecheck && npm run build
+
+  # The end-to-end tests (e2e/): the real app, each test on its own
+  # development chain, under a virtual display
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.27"
+          check-latest: true
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install a virtual display
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
+      - name: Build and test
+        env:
+          GOPRIVATE: github.com/ParallaxProtocol/*
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" make e2e
+
+      - name: Keep the report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/
+          retention-days: 14
