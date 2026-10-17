@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -863,6 +864,17 @@ func (a *App) WalletReplace(req backend.ReplaceRequest) (backend.SentTx, error) 
 // DevSetHold holds the development chain's blocks back, or lets it seal
 // again (make dev only).
 func (a *App) DevSetHold(hold bool) error { return a.node.SetDevHold(hold) }
+
+// DevGoroutines is every goroutine's stack, for the end-to-end tests to
+// keep with a failure that may be a hang (make dev only: a release build
+// refuses it).
+func (a *App) DevGoroutines() (string, error) {
+	if !backend.DevBuild() {
+		return "", errors.New("development builds only")
+	}
+	buf := make([]byte, 1<<20)
+	return string(buf[:runtime.Stack(buf, true)]), nil
+}
 
 // ---------------------------------------------------------------------------
 // Storage (backend/storage.go)

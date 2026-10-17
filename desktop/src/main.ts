@@ -439,8 +439,11 @@ function shieldShell(win: BrowserWindow) {
   const pids = [process.pid, win.webContents.getOSProcessId()];
   backend
     .call("HardenShell", [pids])
-    .then((res) => res.error && console.error(`shielding the shell: ${res.error}`))
-    .catch(() => {});
+    .then((res) => {
+      if (res.error) console.error(`shielding the shell: ${res.error}`);
+      else if (!app.isPackaged) console.error(`shielded the shell's processes ${pids.join(", ")}`);
+    })
+    .catch((e) => console.error(`shielding the shell: ${e instanceof Error ? e.message : e}`));
 }
 
 function createWindow() {

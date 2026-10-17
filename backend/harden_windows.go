@@ -11,6 +11,7 @@ import (
 	"sync"
 	"unsafe"
 
+	"github.com/ParallaxProtocol/parallax/v2/logging"
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/registry"
 )
@@ -190,6 +191,7 @@ func HardenShell(pids []int) error {
 	for _, p := range pids {
 		pid := uint32(p)
 		if p <= 0 || (pid != shell && parents[pid] != shell) {
+			logging.Warn("Not shielding a process that isn't the shell's", "pid", p, "shell", shell, "parent", parents[pid])
 			errs = append(errs, fmt.Errorf("process %d isn't the shell's", p))
 			continue
 		}
@@ -202,9 +204,11 @@ func HardenShell(pids []int) error {
 			windows.CloseHandle(h)
 		}
 		if err != nil {
+			logging.Warn("Couldn't shield the shell's process", "pid", p, "err", err)
 			errs = append(errs, fmt.Errorf("process %d: %w", p, err))
 			continue
 		}
+		logging.Info("Shielded the shell's process", "pid", p)
 		shellHardened[pid] = true
 	}
 	return errors.Join(errs...)

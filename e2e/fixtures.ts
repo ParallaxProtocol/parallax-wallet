@@ -186,6 +186,14 @@ export const test = base.extend<Fixtures & Options>({
       const win = app.windows()[0];
       const shot = await win?.screenshot({ timeout: 5_000 }).catch(() => null);
       if (shot) await testInfo.attach("screenshot", { body: shot, contentType: "image/png" });
+      // Where each of the backend's goroutines stands, for a failure that's a hang (development builds answer it)
+      const stacks = win
+        ? await Promise.race([
+            call<string>(win, "DevGoroutines").catch((e: Error) => `unavailable: ${e.message}`),
+            new Promise<string>((r) => setTimeout(() => r("unavailable: no answer in 5s"), 5_000)),
+          ])
+        : "unavailable: no window";
+      await testInfo.attach("backend goroutines", { body: stacks, contentType: "text/plain" });
       const trace = testInfo.outputPath("trace.zip");
       if (
         await app
