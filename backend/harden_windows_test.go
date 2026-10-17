@@ -31,6 +31,13 @@ func TestHardenProcess(t *testing.T) {
 		hardenedMain()
 		return
 	}
+	// This process tries the other as an ordinary program of the same user
+	// would: without the debug privilege an administrator's process (a CI
+	// runner's) may hold, which passes any access list
+	if err := dropDebugPrivilege(); err != nil {
+		t.Fatalf("dropping the debug privilege: %v", err)
+	}
+	t.Logf("this process's token had SeDebugPrivilege: %v (enabled: %v); dropped, for it and the child", debugPrivilegeHeld, debugPrivilegeEnabled)
 	cmd := exec.Command(os.Args[0], "-test.run=^TestHardenProcess$")
 	cmd.Env = append(os.Environ(), hardenedChild+"=1")
 	cmd.Stderr = os.Stderr

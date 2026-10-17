@@ -31,9 +31,16 @@ import (
 //     none through the legacy injection routes (AppInit DLLs, global
 //     hooks), nor from a network share or a low-integrity file.
 //
+// Its own token loses SeDebugPrivilege first, which it never needs: with
+// it enabled, the process would pass any other's access list, and its own
+// check of its list (ProcessGuarded) would pass it too, saying nothing.
+//
 // Each step stands on its own: what fails is reported, the rest still holds.
 func HardenProcess() error {
 	var errs []error
+	if err := dropDebugPrivilege(); err != nil {
+		errs = append(errs, fmt.Errorf("debug privilege: %w", err))
+	}
 	if err := restrictProcessAccess(); err != nil {
 		errs = append(errs, fmt.Errorf("access list: %w", err))
 	}
@@ -55,6 +62,39 @@ func HardenProcess() error {
 		}
 	}
 	return errors.Join(errs...)
+}
+
+// debugPrivilegeHeld is whether the token had SeDebugPrivilege before
+// dropDebugPrivilege removed it, and whether it was enabled: an
+// administrator's process can start with it on, such as one a CI runner
+// starts (harden_windows_test.go says so when its check fails).
+var debugPrivilegeHeld, debugPrivilegeEnabled bool
+
+// dropDebugPrivilege removes SeDebugPrivilege from the process's token for
+// good. A token without it is left as it is.
+func dropDebugPrivilege() error {
+	var token windows.Token
+	if err := windows.OpenProcessToken(windows.CurrentProcess(), windows.TOKEN_ADJUST_PRIVILEGES|windows.TOKEN_QUERY, &token); err != nil {
+		return err
+	}
+	defer token.Close()
+	var luid windows.LUID
+	if err := windows.LookupPrivilegeValue(nil, windows.StringToUTF16Ptr("SeDebugPrivilege"), &luid); err != nil {
+		return err
+	}
+	remove := windows.Tokenprivileges{PrivilegeCount: 1}
+	remove.Privileges[0] = windows.LUIDAndAttributes{Luid: luid, Attributes: windows.SE_PRIVILEGE_REMOVED}
+	// What it was before: one privilege back if the token held it, none if not
+	var was windows.Tokenprivileges
+	var n uint32
+	if err := windows.AdjustTokenPrivileges(token, false, &remove, uint32(unsafe.Sizeof(was)), &was, &n); err != nil {
+		return err
+	}
+	if was.PrivilegeCount == 1 {
+		debugPrivilegeHeld = true
+		debugPrivilegeEnabled = was.Privileges[0].Attributes&windows.SE_PRIVILEGE_ENABLED != 0
+	}
+	return nil
 }
 
 // What other processes of the same user may do with this one: wait on it
