@@ -876,6 +876,71 @@ const ptBR: Dict = {
   "wallet.autoLock.hours": "Após {n} horas",
   "wallet.autoLock.never": "Nunca",
 
+  // Wallet: what protects it (Settings' Security)
+  "protect.title": "Como a Parallax Wallet protege sua carteira",
+  "protect.desc": "O que mantém suas chaves e sua carteira seguras, e se cada proteção está funcionando agora.",
+  "protect.privacyTitle": "Como a Parallax Wallet protege sua privacidade",
+  "protect.privacyDesc": "O que mantém sua atividade privada, e se cada proteção está funcionando agora.",
+  "protect.status.on": "Ativado",
+  "protect.status.always": "Sempre ativado",
+  "protect.status.partly": "Ativado em parte",
+  "protect.status.off": "Desativado",
+  "protect.status.notInUse": "Sem uso",
+  "protect.status.shared": "Estatísticas compartilhadas",
+  "protect.ownNode": "Seu próprio nó",
+  "protect.ownNode.desc":
+    "Saldos e histórico vêm do nó neste computador, não do servidor de uma empresa, então ninguém mais fica sabendo quais endereços são seus.",
+  "protect.encryption": "Carteira criptografada",
+  "protect.encryption.desc":
+    "Cada chave e frase de recuperação é criptografada com sua senha, assim como seus contatos, os nomes das contas e as solicitações pendentes. Nada na carteira pode ser lido sem ela.",
+  "protect.random": "Chaves de aleatoriedade segura",
+  "protect.random.windows": "Cada chave e frase de recuperação é criada pelo gerador aleatório do sistema Windows.",
+  "protect.random.mac": "Cada chave e frase de recuperação é criada pelo gerador aleatório do sistema macOS.",
+  "protect.random.linux":
+    "Cada chave e frase de recuperação é criada pelo gerador aleatório do kernel Linux, que só responde depois de totalmente inicializado.",
+  "protect.random.hardware": "O processador deste computador acrescenta a ele uma fonte aleatória de hardware.",
+  "protect.random.failClosed":
+    "Se ele falhasse algum dia, o app pararia em vez de criar uma chave com aleatoriedade fraca.",
+  "protect.memory": "Segredos protegidos na memória",
+  "protect.memory.desc":
+    "Enquanto a carteira está desbloqueada, a chave dela fica em memória bloqueada e criptografada, nunca gravada em disco.",
+  "protect.memory.erase": "Senhas, frases de recuperação e chaves também são apagadas da memória logo após o uso.",
+  "protect.process": "Protegida de outros programas",
+  "protect.process.desc":
+    "O motor do app nunca grava a memória dele em um relatório de falhas, e outros programas não conseguem ler essa memória.",
+  "protect.process.dumps": "O motor do app nunca grava a memória dele em um relatório de falhas.",
+  "protect.autoLock": "Bloqueia sozinha",
+  "protect.autoLock.desc": "A carteira é bloqueada quando você fica um tempo sem usar o app, conforme definido acima.",
+  "protect.autoLock.never": "Definido como nunca: a carteira fica desbloqueada até você bloqueá-la.",
+  "protect.away": "Bloqueia quando você se afasta",
+  "protect.away.desc": "A carteira é bloqueada quando o computador entra em suspensão ou a tela é bloqueada.",
+  "protect.away.sleep": "A carteira é bloqueada quando o computador entra em suspensão.",
+  "protect.capture": "Oculta em capturas de tela",
+  "protect.capture.desc":
+    "Enquanto uma frase de recuperação ou uma chave aparece na tela, a janela fica fora de capturas, gravações e compartilhamentos de tela.",
+  "protect.isolation": "Janela isolada",
+  "protect.isolation.desc":
+    "A janela não acessa seus arquivos nem seu sistema e só executa o código do próprio app, que é selado contra adulterações.",
+  "protect.isolation.dev":
+    "Esta versão de desenvolvimento não é selada contra adulterações, como as versões publicadas são.",
+  "protect.logs": "Registros privados",
+  "protect.logs.desc":
+    "Os registros do app são selados para que só a sua carteira consiga lê-los, mesmo que sejam copiados deste computador.",
+  "protect.updates": "Atualizações verificadas criptograficamente",
+  "protect.updates.desc":
+    "Uma atualização só é instalada se corresponder às somas de verificação publicadas com a versão dela; um download danificado ou alterado nunca é instalado.",
+  "protect.tor": "Tor",
+  "protect.tor.desc":
+    "Tudo o que o app envia pode passar pelo Tor, ocultando seu endereço IP da rede e dos serviços que ele usa.",
+  "protect.tracking": "Sem rastreamento",
+  "protect.tracking.desc": "O app não tem análises e não envia nada sobre você ou sua carteira.",
+  "protect.tracking.shared":
+    "Seu nó compartilha as estatísticas públicas dele com a página de status da rede. Dá para desativar isso nas configurações de Rede.",
+  "protect.tracking.cta": "Configurações de Rede",
+  "protect.assistants": "Assistentes de IA perguntam antes",
+  "protect.assistants.desc":
+    "Os assistentes não podem enviar, alterar configurações ou adicionar contas sem sua aprovação, e você escolhe o que eles podem ver.",
+
   // Wallet: passwords
   "wallet.password.new": "Senha",
   "wallet.password.current": "Senha atual",

@@ -23,5 +23,12 @@ func HardenProcess() error {
 	return nil
 }
 
+// ProcessGuarded reads back what HardenProcess set, as it stands now:
+// reading the memory isn't the process's to refuse here.
+func ProcessGuarded() ProcessGuard {
+	var lim unix.Rlimit
+	return ProcessGuard{NoCoreDumps: unix.Getrlimit(unix.RLIMIT_CORE, &lim) == nil && lim.Cur == 0}
+}
+
 // processDiskBytes reads nothing here: the daemon's disk metrics stand.
 func processDiskBytes() (read, written uint64, ok bool) { return 0, 0, false }

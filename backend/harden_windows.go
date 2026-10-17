@@ -9,5 +9,8 @@ package backend
 // process running as the same user.
 func HardenProcess() error { return nil }
 
+// ProcessGuarded is nothing here: HardenProcess has nothing to set.
+func ProcessGuarded() ProcessGuard { return ProcessGuard{} }
+
 // processDiskBytes reads nothing here: the daemon's disk metrics stand.
 func processDiskBytes() (read, written uint64, ok bool) { return 0, 0, false }

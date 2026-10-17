@@ -24,6 +24,10 @@ func TestHardenProcess(t *testing.T) {
 	if err := unix.Getrlimit(unix.RLIMIT_CORE, &lim); err != nil || lim.Cur != 0 {
 		t.Fatalf("core limit = %d (%v), want 0", lim.Cur, err)
 	}
+	// What Settings' Security shows reads it back
+	if g := ProcessGuarded(); !g.NoCoreDumps || !g.NoMemoryReads {
+		t.Fatalf("ProcessGuarded = %+v, want both", g)
+	}
 
 	_, before, ok := processDiskBytes()
 	if !ok {

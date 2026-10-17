@@ -872,6 +872,73 @@ const es: Dict = {
   "wallet.autoLock.hours": "Tras {n} horas",
   "wallet.autoLock.never": "Nunca",
 
+  // Wallet: what protects it (Settings' Security)
+  "protect.title": "Cómo Parallax Wallet protege tu billetera",
+  "protect.desc": "Lo que mantiene seguras tus claves y tu billetera, y si cada protección está funcionando ahora.",
+  "protect.privacyTitle": "Cómo Parallax Wallet protege tu privacidad",
+  "protect.privacyDesc": "Lo que mantiene privada tu actividad, y si cada protección está funcionando ahora.",
+  "protect.status.on": "Activado",
+  "protect.status.always": "Siempre activado",
+  "protect.status.partly": "Activado en parte",
+  "protect.status.off": "Desactivado",
+  "protect.status.notInUse": "Sin usar",
+  "protect.status.shared": "Estadísticas compartidas",
+  "protect.ownNode": "Tu propio nodo",
+  "protect.ownNode.desc":
+    "Los saldos y el historial vienen del nodo de esta computadora, no del servidor de una empresa, así que nadie más sabe qué direcciones son tuyas.",
+  "protect.encryption": "Billetera cifrada",
+  "protect.encryption.desc":
+    "Cada clave y frase de recuperación está cifrada con tu contraseña, igual que tus contactos, los nombres de tus cuentas y las solicitudes pendientes. Sin ella no se puede leer nada de la billetera.",
+  "protect.random": "Claves con aleatoriedad segura",
+  "protect.random.windows":
+    "Cada clave y frase de recuperación se crea con el generador aleatorio del sistema de Windows.",
+  "protect.random.mac": "Cada clave y frase de recuperación se crea con el generador aleatorio del sistema de macOS.",
+  "protect.random.linux":
+    "Cada clave y frase de recuperación se crea con el generador aleatorio del kernel de Linux, que solo responde cuando está completamente inicializado.",
+  "protect.random.hardware": "El procesador de esta computadora le aporta una fuente aleatoria de hardware.",
+  "protect.random.failClosed":
+    "Si alguna vez fallara, la app se detendría en lugar de crear una clave con aleatoriedad débil.",
+  "protect.memory": "Secretos protegidos en memoria",
+  "protect.memory.desc":
+    "Mientras la billetera está desbloqueada, su clave se guarda en memoria bloqueada y cifrada que nunca se escribe en el disco.",
+  "protect.memory.erase":
+    "Además, las contraseñas, frases de recuperación y claves se borran de la memoria justo después de usarse.",
+  "protect.process": "Protegida de otros programas",
+  "protect.process.desc":
+    "El motor de la app nunca escribe su memoria en un informe de fallos, y otros programas no pueden leer su memoria.",
+  "protect.process.dumps": "El motor de la app nunca escribe su memoria en un informe de fallos.",
+  "protect.autoLock": "Se bloquea sola",
+  "protect.autoLock.desc": "La billetera se bloquea cuando no usas la app por un rato, según lo configurado arriba.",
+  "protect.autoLock.never": "Configurado en nunca: la billetera queda desbloqueada hasta que la bloquees.",
+  "protect.away": "Se bloquea cuando te alejas",
+  "protect.away.desc": "La billetera se bloquea cuando la computadora entra en suspensión o se bloquea la pantalla.",
+  "protect.away.sleep": "La billetera se bloquea cuando la computadora entra en suspensión.",
+  "protect.capture": "Oculta en capturas de pantalla",
+  "protect.capture.desc":
+    "Mientras se muestra una frase de recuperación o una clave, la ventana queda fuera de capturas, grabaciones y pantallas compartidas.",
+  "protect.isolation": "Ventana aislada",
+  "protect.isolation.desc":
+    "La ventana no puede acceder a tus archivos ni a tu sistema y solo ejecuta el código de la app, que además está sellada contra alteraciones.",
+  "protect.isolation.dev":
+    "Esta compilación de desarrollo no está sellada contra alteraciones, como sí lo están las versiones publicadas.",
+  "protect.logs": "Registros privados",
+  "protect.logs.desc":
+    "Los registros de la app están sellados para que solo tu billetera pueda leerlos, aunque se copien fuera de esta computadora.",
+  "protect.updates": "Actualizaciones verificadas criptográficamente",
+  "protect.updates.desc":
+    "Una actualización solo se instala si coincide con las sumas de verificación publicadas con su versión, así que una descarga dañada o alterada nunca se instala.",
+  "protect.tor": "Tor",
+  "protect.tor.desc":
+    "Todo lo que envía la app puede pasar por Tor, ocultando tu dirección IP de la red y de los servicios que usa.",
+  "protect.tracking": "Sin rastreo",
+  "protect.tracking.desc": "La app no tiene analíticas y no envía nada sobre ti ni sobre tu billetera.",
+  "protect.tracking.shared":
+    "Tu nodo comparte sus estadísticas públicas con la página de estado de la red. Puedes desactivarlo en la configuración de Red.",
+  "protect.tracking.cta": "Configuración de Red",
+  "protect.assistants": "Los asistentes de IA preguntan primero",
+  "protect.assistants.desc":
+    "Los asistentes no pueden enviar, cambiar la configuración ni agregar cuentas sin tu aprobación, y tú eliges qué pueden ver.",
+
   // Wallet: passwords
   "wallet.password.new": "Contraseña",
   "wallet.password.current": "Contraseña actual",

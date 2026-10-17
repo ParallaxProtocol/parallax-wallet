@@ -893,6 +893,76 @@ const de: Dict = {
   "wallet.autoLock.hours": "Nach {n} Stunden",
   "wallet.autoLock.never": "Nie",
 
+  // Wallet: what protects it (Settings' Security)
+  "protect.title": "So schützt Parallax Wallet Ihre Wallet",
+  "protect.desc": "Was Ihre Schlüssel und Ihre Wallet sicher hält – und ob es gerade aktiv ist.",
+  "protect.privacyTitle": "So schützt Parallax Wallet Ihre Privatsphäre",
+  "protect.privacyDesc": "Was Ihre Aktivität privat hält – und ob es gerade aktiv ist.",
+  "protect.status.on": "An",
+  "protect.status.always": "Immer an",
+  "protect.status.partly": "Teilweise an",
+  "protect.status.off": "Aus",
+  "protect.status.notInUse": "Nicht in Gebrauch",
+  "protect.status.shared": "Statistiken geteilt",
+  "protect.ownNode": "Ihr eigener Node",
+  "protect.ownNode.desc":
+    "Guthaben und Verlauf kommen vom Node auf diesem Computer, nicht vom Server eines Unternehmens – so erfährt niemand sonst, welche Adressen Ihnen gehören.",
+  "protect.encryption": "Verschlüsselte Wallet",
+  "protect.encryption.desc":
+    "Jeder Schlüssel und jede Wiederherstellungsphrase ist mit Ihrem Passwort verschlüsselt, ebenso Ihre Kontakte, Kontonamen und ausstehenden Anfragen. Ohne das Passwort lässt sich nichts in der Wallet lesen.",
+  "protect.random": "Schlüssel aus sicherem Zufall",
+  "protect.random.windows":
+    "Jeder Schlüssel und jede Wiederherstellungsphrase entsteht aus dem Zufallsgenerator von Windows.",
+  "protect.random.mac":
+    "Jeder Schlüssel und jede Wiederherstellungsphrase entsteht aus dem Zufallsgenerator von macOS.",
+  "protect.random.linux":
+    "Jeder Schlüssel und jede Wiederherstellungsphrase entsteht aus dem Zufallsgenerator des Linux-Kernels, der erst antwortet, wenn er vollständig initialisiert ist.",
+  "protect.random.hardware": "Der Prozessor dieses Computers speist zusätzlich eine Hardware-Zufallsquelle ein.",
+  "protect.random.failClosed":
+    "Sollte er je versagen, würde die App anhalten, statt einen Schlüssel aus schwachem Zufall zu erzeugen.",
+  "protect.memory": "Geheimnisse im Arbeitsspeicher geschützt",
+  "protect.memory.desc":
+    "Solange die Wallet entsperrt ist, liegt ihr Schlüssel in gesperrtem, verschlüsseltem Arbeitsspeicher, der nie auf die Festplatte geschrieben wird.",
+  "protect.memory.erase":
+    "Passwörter, Wiederherstellungsphrasen und Schlüssel werden außerdem direkt nach Gebrauch aus dem Arbeitsspeicher gelöscht.",
+  "protect.process": "Abgeschirmt von anderen Programmen",
+  "protect.process.desc":
+    "Der Kern der App schreibt seinen Arbeitsspeicher nie in einen Absturzbericht, und andere Programme können ihn nicht auslesen.",
+  "protect.process.dumps": "Der Kern der App schreibt seinen Arbeitsspeicher nie in einen Absturzbericht.",
+  "protect.autoLock": "Sperrt sich selbst",
+  "protect.autoLock.desc":
+    "Die Wallet sperrt sich, wenn Sie die App eine Weile nicht verwendet haben – wie oben eingestellt.",
+  "protect.autoLock.never": "Auf „Nie“ gestellt: Die Wallet bleibt entsperrt, bis Sie sie sperren.",
+  "protect.away": "Sperrt, wenn Sie weggehen",
+  "protect.away.desc":
+    "Die Wallet sperrt sich, wenn der Computer in den Ruhezustand wechselt oder der Bildschirm gesperrt wird.",
+  "protect.away.sleep": "Die Wallet sperrt sich, wenn der Computer in den Ruhezustand wechselt.",
+  "protect.capture": "Vor Bildschirmfotos verborgen",
+  "protect.capture.desc":
+    "Solange eine Wiederherstellungsphrase oder ein Schlüssel angezeigt wird, bleibt das Fenster aus Bildschirmfotos, Aufnahmen und Bildschirmfreigaben heraus.",
+  "protect.isolation": "Isoliertes Fenster",
+  "protect.isolation.desc":
+    "Das Fenster kann weder auf Ihre Dateien noch auf Ihr System zugreifen und führt nur den Code der App aus; die App selbst ist gegen Manipulation versiegelt.",
+  "protect.isolation.dev":
+    "Dieser Entwicklungs-Build ist nicht gegen Manipulation versiegelt, wie es Release-Builds sind.",
+  "protect.logs": "Private Protokolle",
+  "protect.logs.desc":
+    "Die Protokolle der App sind versiegelt, sodass nur Ihre Wallet sie lesen kann – selbst wenn sie von diesem Computer kopiert werden.",
+  "protect.updates": "Kryptografisch geprüfte Updates",
+  "protect.updates.desc":
+    "Ein Update wird nur installiert, wenn es zu den mit seiner Version veröffentlichten Prüfsummen passt – ein beschädigter oder veränderter Download wird nie installiert.",
+  "protect.tor": "Tor",
+  "protect.tor.desc":
+    "Alles, was die App sendet, kann über Tor laufen, sodass Ihre IP-Adresse vor dem Netzwerk und den genutzten Diensten verborgen bleibt.",
+  "protect.tracking": "Kein Tracking",
+  "protect.tracking.desc": "Die App hat keine Analysen und sendet nichts über Sie oder Ihre Wallet.",
+  "protect.tracking.shared":
+    "Ihr Node teilt seine öffentlichen Statistiken mit der Statusseite des Netzwerks. In den Netzwerk-Einstellungen lässt sich das ausschalten.",
+  "protect.tracking.cta": "Netzwerk-Einstellungen",
+  "protect.assistants": "KI-Assistenten fragen zuerst",
+  "protect.assistants.desc":
+    "Assistenten können ohne Ihre Zustimmung nichts senden, keine Einstellungen ändern und keine Konten hinzufügen – und Sie bestimmen, was sie sehen dürfen.",
+
   // Wallet: passwords
   "wallet.password.new": "Passwort",
   "wallet.password.current": "Aktuelles Passwort",

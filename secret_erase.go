@@ -5,7 +5,10 @@
 
 package main
 
-import "runtime/secret"
+import (
+	"runtime"
+	"runtime/secret"
+)
 
 // erasing runs f under runtime/secret: once it returns, the registers and
 // stack it used are wiped, and every heap allocation it made is wiped when
@@ -15,3 +18,6 @@ import "runtime/secret"
 // needs GOEXPERIMENT=runtimesecret (set for Linux builds, the Makefile) and
 // so far erases only on linux/amd64 and linux/arm64.
 func erasing(f func()) { secret.Do(f) }
+
+// secretErasing reports whether erasing wipes anything on this platform.
+var secretErasing = runtime.GOOS == "linux" && (runtime.GOARCH == "amd64" || runtime.GOARCH == "arm64")

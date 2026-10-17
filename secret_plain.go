@@ -8,3 +8,6 @@ package main
 // erasing runs f. Built with GOEXPERIMENT=runtimesecret it also wipes what
 // f leaves in memory (secret_erase.go).
 func erasing(f func()) { f() }
+
+// secretErasing reports whether erasing wipes anything: not in this build.
+const secretErasing = false

@@ -875,6 +875,69 @@ export const en: Dict = {
   "wallet.autoLock.hours": "After {n} hours",
   "wallet.autoLock.never": "Never",
 
+  // Wallet: what protects it (Settings' Security)
+  "protect.title": "How Parallax Wallet protects your wallet",
+  "protect.desc": "What keeps your keys and your wallet safe, and whether each is working right now.",
+  "protect.privacyTitle": "How Parallax Wallet protects your privacy",
+  "protect.privacyDesc": "What keeps what you do yours, and whether each is working right now.",
+  "protect.status.on": "On",
+  "protect.status.always": "Always on",
+  "protect.status.partly": "Partly on",
+  "protect.status.off": "Off",
+  "protect.status.notInUse": "Not in use",
+  "protect.status.shared": "Stats shared",
+  "protect.ownNode": "Your own node",
+  "protect.ownNode.desc":
+    "Balances and history come from the node on this computer, not from a company's server, so no one else learns which addresses are yours.",
+  "protect.encryption": "Encrypted wallet",
+  "protect.encryption.desc":
+    "Every key and recovery phrase is encrypted with your password, and so are your contacts, account names and pending requests. Nothing in the wallet can be read without it.",
+  "protect.random": "Keys from secure randomness",
+  "protect.random.windows": "Every key and recovery phrase is made from Windows' system random generator.",
+  "protect.random.mac": "Every key and recovery phrase is made from macOS's system random generator.",
+  "protect.random.linux":
+    "Every key and recovery phrase is made from the Linux kernel's random generator, which answers only once it's fully seeded.",
+  "protect.random.hardware": "This computer's processor adds a hardware random source to it.",
+  "protect.random.failClosed": "If it ever failed, the app would stop rather than make a key from weak randomness.",
+  "protect.memory": "Secrets protected in memory",
+  "protect.memory.desc":
+    "While the wallet is unlocked, its key is held in memory that's locked, encrypted and never written to disk.",
+  "protect.memory.erase": "Passwords, recovery phrases and keys are also wiped from memory right after use.",
+  "protect.process": "Shielded from other programs",
+  "protect.process.desc":
+    "The app's engine never writes what's in its memory to a crash report, and other programs can't read its memory.",
+  "protect.process.dumps": "The app's engine never writes what's in its memory to a crash report.",
+  "protect.autoLock": "Locks itself",
+  "protect.autoLock.desc": "The wallet locks when you haven't used the app for a while, as set above.",
+  "protect.autoLock.never": "Set to never: the wallet stays unlocked until you lock it.",
+  "protect.away": "Locks when you step away",
+  "protect.away.desc": "The wallet locks when the computer goes to sleep or its screen locks.",
+  "protect.away.sleep": "The wallet locks when the computer goes to sleep.",
+  "protect.capture": "Hidden from screenshots",
+  "protect.capture.desc":
+    "While a recovery phrase or a key is on screen, the window is kept out of screenshots, recordings and screen sharing.",
+  "protect.isolation": "Isolated window",
+  "protect.isolation.desc":
+    "The window can't reach your files or your system and runs only the app's own code, and the app is sealed against tampering.",
+  "protect.isolation.dev": "This development build isn't sealed against tampering, as release builds are.",
+  "protect.logs": "Private logs",
+  "protect.logs.desc":
+    "The app's logs are sealed so only your wallet can read them, even if they're copied off this computer.",
+  "protect.updates": "Cryptographically verified updates",
+  "protect.updates.desc":
+    "An update is installed only if it matches the checksums published with its release, so a damaged or altered download never is.",
+  "protect.tor": "Tor",
+  "protect.tor.desc":
+    "Everything the app sends can go through Tor, hiding your IP address from the network and the services it uses.",
+  "protect.tracking": "No tracking",
+  "protect.tracking.desc": "The app has no analytics and sends nothing about you or your wallet.",
+  "protect.tracking.shared":
+    "Your node shares its public stats with the network's status page. Network settings can turn that off.",
+  "protect.tracking.cta": "Network settings",
+  "protect.assistants": "AI assistants ask first",
+  "protect.assistants.desc":
+    "Assistants can't send, change settings or add accounts without your approval, and you choose what they can see.",
+
   // Wallet: passwords
   "wallet.password.new": "Password",
   "wallet.password.current": "Current password",

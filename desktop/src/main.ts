@@ -536,6 +536,9 @@ function wireIpc() {
   ipcMain.handle("shell:openExternal", (event, url: unknown) => {
     if (trusted(event) && typeof url === "string") openExternal(url);
   });
+  // Whether this is the packaged app, for Settings' Security: its fuses and
+  // sealed app.asar are the packaged binary's (electron-builder.yml)
+  ipcMain.handle("security:packaged", (event) => trusted(event) && app.isPackaged);
   ipcMain.handle("login:get", (event) => {
     if (!trusted(event)) return { supported: false, enabled: false };
     return { supported: app.isPackaged, enabled: app.isPackaged && openAtLogin() };

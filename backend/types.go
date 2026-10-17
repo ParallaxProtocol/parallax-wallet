@@ -461,3 +461,12 @@ func (g GUIConfig) AutoLock() time.Duration {
 		return time.Duration(g.AutoLockMinutes) * time.Minute
 	}
 }
+
+// ProcessGuard is what keeps the backend's memory, where passwords and
+// keys pass, from being copied out of it (HardenProcess), as it stands.
+type ProcessGuard struct {
+	// No core dump is written if it crashes
+	NoCoreDumps bool `json:"noCoreDumps"`
+	// Other processes of the same user can't attach to it or read its memory (Linux)
+	NoMemoryReads bool `json:"noMemoryReads"`
+}

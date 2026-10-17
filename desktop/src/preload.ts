@@ -35,6 +35,18 @@ contextBridge.exposeInMainWorld("parallax", {
   setTheme(pref: "system" | "light" | "dark") {
     ipcRenderer.send("theme:set", pref);
   },
+  /**
+   * How the window is kept apart from the system, as it stands: its
+   * renderer sandboxed, the page apart from this script, and the packaged
+   * build's sealed binary.
+   */
+  async security(): Promise<{ sandboxed: boolean; isolated: boolean; packaged: boolean }> {
+    return {
+      sandboxed: process.sandboxed === true,
+      isolated: process.contextIsolated === true,
+      packaged: (await ipcRenderer.invoke("security:packaged")) === true,
+    };
+  },
   /** Whether the app starts at login; `supported` is false in development. */
   loginItem(): Promise<{ supported: boolean; enabled: boolean }> {
     return ipcRenderer.invoke("login:get");

@@ -9,6 +9,7 @@ declare global {
       on: (event: string, cb: (data: any) => void) => () => void;
       openExternal: (url: string) => Promise<void>;
       setTheme: (pref: "system" | "light" | "dark") => void;
+      security: () => Promise<WindowSecurity>;
       loginItem: () => Promise<{ supported: boolean; enabled: boolean }>;
       setLoginItem: (on: boolean) => Promise<void>;
       keepAwake: (on: boolean) => void;
@@ -23,6 +24,28 @@ declare global {
     };
   }
 }
+
+/** How the window is kept apart from the system (desktop/src/preload.ts). */
+export type WindowSecurity = {
+  /** The renderer runs in Chromium's sandbox: no files, no system. */
+  sandboxed: boolean;
+  /** The page is kept apart from the preload script: it reaches the app only through window.parallax. */
+  isolated: boolean;
+  /** The packaged app, its binary's fuses flipped and its code sealed; not in development. */
+  packaged: boolean;
+};
+
+/** How the backend guards what passes through it (app.go SecurityStatus). */
+export type SecurityStatus = {
+  /** No core dump is written if it crashes. */
+  noCoreDumps: boolean;
+  /** Other processes of the same user can't attach to it or read its memory (Linux). */
+  noMemoryReads: boolean;
+  /** Passwords, phrases and keys are wiped from memory after each call that carries them. */
+  secretErasing: boolean;
+  /** The processor has a hardware random source the kernel mixes in (Linux; elsewhere not known). */
+  hardwareRandom: boolean;
+};
 
 /** Open a URL in the user's default browser. */
 export function openExternal(url: string) {
@@ -1032,6 +1055,7 @@ export const api = {
   bootstrapNeeded: () => call<boolean>("BootstrapNeeded"),
   saveBootstrap: (cfg: GUIConfig) => call<void>("SaveBootstrap", cfg),
   getConfig: () => call<GUIConfig>("GetConfig"),
+  securityStatus: () => call<SecurityStatus>("SecurityStatus"),
   updateConfig: (cfg: GUIConfig) => call<void>("UpdateConfig", cfg),
 
   mcpStatus: () => call<MCPStatus>("MCPStatus"),

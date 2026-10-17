@@ -38,6 +38,19 @@ func HardenProcess() error {
 	return errors.Join(errs...)
 }
 
+// ProcessGuarded reads back what HardenProcess set, as it stands now.
+func ProcessGuarded() ProcessGuard {
+	var g ProcessGuard
+	var lim unix.Rlimit
+	if unix.Getrlimit(unix.RLIMIT_CORE, &lim) == nil {
+		g.NoCoreDumps = lim.Cur == 0
+	}
+	if d, err := unix.PrctlRetInt(unix.PR_GET_DUMPABLE, 0, 0, 0, 0); err == nil {
+		g.NoMemoryReads = d == 0
+	}
+	return g
+}
+
 // procIO is /proc/self/io, opened before the process became non-dumpable.
 var procIO *os.File
 

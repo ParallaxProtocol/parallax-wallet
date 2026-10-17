@@ -879,6 +879,78 @@ const fr: Dict = {
   "wallet.autoLock.hour": "Après 1 heure",
   "wallet.autoLock.hours": "Après {n} heures",
   "wallet.autoLock.never": "Jamais",
+
+  // Wallet: what protects it (Settings' Security)
+  "protect.title": "Comment Parallax Wallet protège votre portefeuille",
+  "protect.desc":
+    "Ce qui garde vos clés et votre portefeuille en sécurité, et si chaque protection fonctionne en ce moment.",
+  "protect.privacyTitle": "Comment Parallax Wallet protège votre vie privée",
+  "protect.privacyDesc": "Ce qui garde votre activité privée, et si chaque protection fonctionne en ce moment.",
+  "protect.status.on": "Activé",
+  "protect.status.always": "Toujours activé",
+  "protect.status.partly": "Activé en partie",
+  "protect.status.off": "Désactivé",
+  "protect.status.notInUse": "Non utilisé",
+  "protect.status.shared": "Statistiques partagées",
+  "protect.ownNode": "Votre propre nœud",
+  "protect.ownNode.desc":
+    "Les soldes et l’historique viennent du nœud de cet ordinateur, pas du serveur d’une entreprise : personne d’autre ne sait quelles adresses sont les vôtres.",
+  "protect.encryption": "Portefeuille chiffré",
+  "protect.encryption.desc":
+    "Chaque clé et chaque phrase de récupération est chiffrée avec votre mot de passe, tout comme vos contacts, les noms de vos comptes et les demandes en attente. Rien dans le portefeuille ne peut être lu sans lui.",
+  "protect.random": "Des clés issues d’un aléa sûr",
+  "protect.random.windows":
+    "Chaque clé et chaque phrase de récupération est créée par le générateur aléatoire de Windows.",
+  "protect.random.mac": "Chaque clé et chaque phrase de récupération est créée par le générateur aléatoire de macOS.",
+  "protect.random.linux":
+    "Chaque clé et chaque phrase de récupération est créée par le générateur aléatoire du noyau Linux, qui ne répond qu’une fois entièrement initialisé.",
+  "protect.random.hardware": "Le processeur de cet ordinateur y ajoute une source aléatoire matérielle.",
+  "protect.random.failClosed":
+    "S’il venait à défaillir, l’application s’arrêterait plutôt que de créer une clé à partir d’un aléa faible.",
+  "protect.memory": "Secrets protégés en mémoire",
+  "protect.memory.desc":
+    "Tant que le portefeuille est déverrouillé, sa clé est gardée dans une mémoire verrouillée et chiffrée, jamais écrite sur le disque.",
+  "protect.memory.erase":
+    "Les mots de passe, phrases de récupération et clés sont aussi effacés de la mémoire juste après usage.",
+  "protect.process": "À l’abri des autres programmes",
+  "protect.process.desc":
+    "Le moteur de l’application n’écrit jamais sa mémoire dans un rapport de plantage, et les autres programmes ne peuvent pas la lire.",
+  "protect.process.dumps": "Le moteur de l’application n’écrit jamais sa mémoire dans un rapport de plantage.",
+  "protect.autoLock": "Se verrouille tout seul",
+  "protect.autoLock.desc":
+    "Le portefeuille se verrouille lorsque vous n’avez pas utilisé l’application depuis un moment, comme réglé ci-dessus.",
+  "protect.autoLock.never":
+    "Réglé sur jamais : le portefeuille reste déverrouillé jusqu’à ce que vous le verrouilliez.",
+  "protect.away": "Se verrouille quand vous vous absentez",
+  "protect.away.desc":
+    "Le portefeuille se verrouille lorsque l’ordinateur se met en veille ou que l’écran se verrouille.",
+  "protect.away.sleep": "Le portefeuille se verrouille lorsque l’ordinateur se met en veille.",
+  "protect.capture": "Masqué des captures d’écran",
+  "protect.capture.desc":
+    "Tant qu’une phrase de récupération ou une clé est affichée, la fenêtre est exclue des captures d’écran, des enregistrements et des partages d’écran.",
+  "protect.isolation": "Fenêtre isolée",
+  "protect.isolation.desc":
+    "La fenêtre ne peut accéder ni à vos fichiers ni à votre système et n’exécute que le code de l’application, elle-même scellée contre toute altération.",
+  "protect.isolation.dev":
+    "Cette version de développement n’est pas scellée contre les altérations, contrairement aux versions publiées.",
+  "protect.logs": "Journaux privés",
+  "protect.logs.desc":
+    "Les journaux de l’application sont scellés pour que seul votre portefeuille puisse les lire, même s’ils sont copiés hors de cet ordinateur.",
+  "protect.updates": "Mises à jour vérifiées cryptographiquement",
+  "protect.updates.desc":
+    "Une mise à jour n’est installée que si elle correspond aux sommes de contrôle publiées avec sa version : un téléchargement endommagé ou modifié n’est jamais installé.",
+  "protect.tor": "Tor",
+  "protect.tor.desc":
+    "Tout ce que l’application envoie peut passer par Tor, ce qui masque votre adresse IP au réseau et aux services qu’elle utilise.",
+  "protect.tracking": "Aucun pistage",
+  "protect.tracking.desc":
+    "L’application n’a aucune analyse d’audience et n’envoie rien sur vous ni sur votre portefeuille.",
+  "protect.tracking.shared":
+    "Votre nœud partage ses statistiques publiques avec la page d’état du réseau. Les réglages Réseau permettent de le désactiver.",
+  "protect.tracking.cta": "Réglages Réseau",
+  "protect.assistants": "Les assistants IA demandent d’abord",
+  "protect.assistants.desc":
+    "Les assistants ne peuvent ni envoyer, ni modifier les réglages, ni ajouter de comptes sans votre accord, et vous choisissez ce qu’ils peuvent voir.",
   // Wallet: passwords
   "wallet.password.new": "Mot de passe",
   "wallet.password.current": "Mot de passe actuel",

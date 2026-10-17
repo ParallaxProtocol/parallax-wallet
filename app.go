@@ -273,6 +273,26 @@ func (a *App) SaveBootstrap(cfg backend.GUIConfig) error {
 
 func (a *App) GetConfig() backend.GUIConfig { return a.cfg.Get() }
 
+// SecurityStatus is how the backend guards what passes through it, as it
+// stands now, for Settings' Security to show.
+type SecurityStatus struct {
+	backend.ProcessGuard
+	// Passwords, phrases and keys are wiped from memory after each call
+	// that carries them (secret_erase.go)
+	SecretErasing bool `json:"secretErasing"`
+	// The processor has a hardware random source the kernel mixes into
+	// the generator keys come from (Linux; elsewhere not known)
+	HardwareRandom bool `json:"hardwareRandom"`
+}
+
+func (a *App) SecurityStatus() SecurityStatus {
+	return SecurityStatus{
+		ProcessGuard:   backend.ProcessGuarded(),
+		SecretErasing:  secretErasing,
+		HardwareRandom: backend.HardwareRandom(),
+	}
+}
+
 // UpdateConfig saves the config the frontend edited, once the node would
 // accept it. Fields the backend keeps itself (the peer lists) are carried
 // over from the stored config, so a page holding an older copy can't roll

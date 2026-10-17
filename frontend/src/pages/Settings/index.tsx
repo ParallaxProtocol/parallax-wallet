@@ -40,6 +40,7 @@ import { OnionSymbol, SparklesSymbol } from "../../components/ui/symbols";
 import { IconTile, TILE } from "../../components/ui/IconTile";
 import { AccountsSettings, SecuritySettings } from "../Wallet/Accounts";
 import { NodeStorageActions, WalletStorage, WipeWallet } from "./storage";
+import Protections from "./Protections";
 import { Indicator } from "../../components/ui/Indicator";
 import { Row, Rows } from "../../components/ui/Panel";
 import { Segmented } from "../../components/ui/Segmented";
@@ -456,7 +457,14 @@ export default function Settings() {
             {err && <Notice tone="critical">{err}</Notice>}
 
             {section === "accounts" && <AccountsSettings />}
-            {section === "security" && <SecuritySettings />}
+            {section === "security" && (
+              <>
+                <SecuritySettings />
+                <Group title={t("protect.title")} desc={t("protect.desc")}>
+                  <Protections kind="security" />
+                </Group>
+              </>
+            )}
             {section === "storage" && (
               <>
                 <Group title={t("nav.wallet")}>
@@ -475,85 +483,90 @@ export default function Settings() {
 
             {/* Tor, for everything the app sends: applied at once, as a theme is */}
             {section === "privacy" && (
-              <Group title={t("tor.switch")} desc={t("settings.torGroup.desc")}>
-                <Rows>
-                  <Setting
-                    title={t("settings.tor")}
-                    more={t("settings.tor.more")}
-                    desc={t("settings.tor.desc")}
-                    restart={restart("tor")}
-                  >
-                    <Toggle checked={cfg.tor} onChange={(v) => update({ tor: v })} label={t("settings.tor")} />
-                  </Setting>
-                  {/* How the saved switch's Tor is doing, while it's on */}
-                  <TorStatusRow on={orig.tor} />
-                  <Reveal show={cfg.tor}>
+              <>
+                <Group title={t("tor.switch")} desc={t("settings.torGroup.desc")}>
+                  <Rows>
                     <Setting
-                      title={t("settings.torPeers")}
-                      more={t("settings.torPeers.more")}
-                      desc={t("settings.torPeers.desc")}
-                      restart={restart("torOnionOnly")}
+                      title={t("settings.tor")}
+                      more={t("settings.tor.more")}
+                      desc={t("settings.tor.desc")}
+                      restart={restart("tor")}
                     >
-                      <Segmented
-                        size="sm"
-                        value={cfg.torOnionOnly ? "onion" : "all"}
-                        onChange={(v) => update({ torOnionOnly: v === "onion" })}
-                        options={[
-                          { value: "all", label: t("settings.torPeers.all") },
-                          { value: "onion", label: t("settings.torPeers.onion") },
-                        ]}
-                      />
+                      <Toggle checked={cfg.tor} onChange={(v) => update({ tor: v })} label={t("settings.tor")} />
                     </Setting>
-                  </Reveal>
-                  <TorSystemSetting
-                    checked={cfg.torSystem}
-                    restart={restart("torSystem")}
-                    onChange={(v) => update({ torSystem: v })}
-                  />
-                  {/* Where the Tor on this computer is: the node's proxy and
-                      Tor control settings, found on the usual ports when empty */}
-                  <Reveal show={cfg.torSystem || !torBundled}>
-                    <Setting
-                      title={t("settings.torSocks")}
-                      desc={t("settings.torSocks.desc")}
-                      flag="--proxy"
-                      restart={restart("proxy")}
-                    >
-                      <TextInput
-                        width="w-44"
-                        value={cfg.proxy}
-                        placeholder={t("settings.torSocks.placeholder")}
-                        onChange={(v) => update({ proxy: v })}
-                      />
-                    </Setting>
-                    <Setting
-                      title={t("settings.torControl")}
-                      desc={t("settings.torControl.desc")}
-                      restart={restart("torControl")}
-                    >
-                      <TextInput
-                        width="w-44"
-                        value={cfg.torControl}
-                        placeholder={t("settings.torControl.placeholderAuto")}
-                        onChange={(v) => update({ torControl: v })}
-                      />
-                    </Setting>
-                    <Setting
-                      title={t("settings.torPassword")}
-                      desc={t("settings.torPassword.desc")}
-                      restart={restart("torPassword")}
-                    >
-                      <TextInput
-                        type="password"
-                        width="w-44"
-                        value={cfg.torPassword}
-                        placeholder={t("settings.torPassword.placeholder")}
-                        onChange={(v) => update({ torPassword: v })}
-                      />
-                    </Setting>
-                  </Reveal>
-                </Rows>
-              </Group>
+                    {/* How the saved switch's Tor is doing, while it's on */}
+                    <TorStatusRow on={orig.tor} />
+                    <Reveal show={cfg.tor}>
+                      <Setting
+                        title={t("settings.torPeers")}
+                        more={t("settings.torPeers.more")}
+                        desc={t("settings.torPeers.desc")}
+                        restart={restart("torOnionOnly")}
+                      >
+                        <Segmented
+                          size="sm"
+                          value={cfg.torOnionOnly ? "onion" : "all"}
+                          onChange={(v) => update({ torOnionOnly: v === "onion" })}
+                          options={[
+                            { value: "all", label: t("settings.torPeers.all") },
+                            { value: "onion", label: t("settings.torPeers.onion") },
+                          ]}
+                        />
+                      </Setting>
+                    </Reveal>
+                    <TorSystemSetting
+                      checked={cfg.torSystem}
+                      restart={restart("torSystem")}
+                      onChange={(v) => update({ torSystem: v })}
+                    />
+                    {/* Where the Tor on this computer is: the node's proxy and
+                        Tor control settings, found on the usual ports when empty */}
+                    <Reveal show={cfg.torSystem || !torBundled}>
+                      <Setting
+                        title={t("settings.torSocks")}
+                        desc={t("settings.torSocks.desc")}
+                        flag="--proxy"
+                        restart={restart("proxy")}
+                      >
+                        <TextInput
+                          width="w-44"
+                          value={cfg.proxy}
+                          placeholder={t("settings.torSocks.placeholder")}
+                          onChange={(v) => update({ proxy: v })}
+                        />
+                      </Setting>
+                      <Setting
+                        title={t("settings.torControl")}
+                        desc={t("settings.torControl.desc")}
+                        restart={restart("torControl")}
+                      >
+                        <TextInput
+                          width="w-44"
+                          value={cfg.torControl}
+                          placeholder={t("settings.torControl.placeholderAuto")}
+                          onChange={(v) => update({ torControl: v })}
+                        />
+                      </Setting>
+                      <Setting
+                        title={t("settings.torPassword")}
+                        desc={t("settings.torPassword.desc")}
+                        restart={restart("torPassword")}
+                      >
+                        <TextInput
+                          type="password"
+                          width="w-44"
+                          value={cfg.torPassword}
+                          placeholder={t("settings.torPassword.placeholder")}
+                          onChange={(v) => update({ torPassword: v })}
+                        />
+                      </Setting>
+                    </Reveal>
+                  </Rows>
+                </Group>
+                <Group title={t("protect.privacyTitle")} desc={t("protect.privacyDesc")}>
+                  <Protections kind="privacy" />
+                </Group>
+              </>
             )}
 
             {section === "general" && (
