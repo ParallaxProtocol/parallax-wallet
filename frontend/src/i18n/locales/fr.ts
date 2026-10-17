@@ -914,8 +914,11 @@ const fr: Dict = {
     "Les mots de passe, phrases de récupération et clés sont aussi effacés de la mémoire juste après usage.",
   "protect.process": "À l’abri des autres programmes",
   "protect.process.desc":
-    "Le moteur de l’application n’écrit jamais sa mémoire dans un rapport de plantage, et les autres programmes ne peuvent pas la lire.",
+    "Le moteur de l’application n’écrit jamais sa mémoire dans un rapport de plantage, et les autres programmes ne peuvent pas la lire sans droits d’administrateur.",
   "protect.process.dumps": "Le moteur de l’application n’écrit jamais sa mémoire dans un rapport de plantage.",
+  "protect.process.reads":
+    "Les autres programmes ne peuvent pas lire la mémoire du moteur de l’application sans droits d’administrateur.",
+  "protect.process.signed": "Seul du code signé par Microsoft peut y être chargé.",
   "protect.autoLock": "Se verrouille tout seul",
   "protect.autoLock.desc":
     "Le portefeuille se verrouille lorsque vous n’avez pas utilisé l’application depuis un moment, comme réglé ci-dessus.",

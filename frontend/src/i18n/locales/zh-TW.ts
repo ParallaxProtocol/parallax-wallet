@@ -842,8 +842,11 @@ const zhTW: Dict = {
   "protect.memory.desc": "錢包解鎖期間，其金鑰保存在鎖定且加密的記憶體中，絕不會寫入磁碟。",
   "protect.memory.erase": "密碼、助記詞與金鑰在使用後也會立即從記憶體中清除。",
   "protect.process": "不受其他程式窺探",
-  "protect.process.desc": "應用程式的引擎從不把記憶體內容寫入當機報告，其他程式也無法讀取它的記憶體。",
+  "protect.process.desc":
+    "應用程式的引擎從不把記憶體內容寫入當機報告，沒有系統管理員權限的其他程式也無法讀取它的記憶體。",
   "protect.process.dumps": "應用程式的引擎從不把記憶體內容寫入當機報告。",
+  "protect.process.reads": "沒有系統管理員權限的其他程式無法讀取應用程式引擎的記憶體。",
+  "protect.process.signed": "只有經 Microsoft 簽署的程式碼才能載入其中。",
   "protect.autoLock": "自動鎖定",
   "protect.autoLock.desc": "一段時間未使用應用程式後，錢包會依上方的設定自動鎖定。",
   "protect.autoLock.never": "已設為永不：錢包會保持解鎖，直到你手動鎖定。",

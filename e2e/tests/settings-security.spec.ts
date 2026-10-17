@@ -35,7 +35,7 @@ test("Security says how each protection of the wallet stands", async ({ page }) 
   await expect(protections.getByText(/also wiped from memory right after use\.$/)).toBeVisible();
   // Read from the backend: the process neither dumped nor readable
   await expect(status(page, SECURITY, "Shielded from other programs", "On")).toBeVisible();
-  await expect(protections.getByText(/other programs can't read its memory\.$/)).toBeVisible();
+  await expect(protections.getByText(/can't read its memory without administrator rights\.$/)).toBeVisible();
   // Each row says what's in effect here: on Linux, locking at sleep, and no screenshot row at all
   await expect(status(page, SECURITY, "Locks when you step away", "On")).toBeVisible();
   await expect(protections.getByText("The wallet locks when the computer goes to sleep.")).toBeVisible();

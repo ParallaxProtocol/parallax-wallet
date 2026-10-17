@@ -467,6 +467,8 @@ func (g GUIConfig) AutoLock() time.Duration {
 type ProcessGuard struct {
 	// No core dump is written if it crashes
 	NoCoreDumps bool `json:"noCoreDumps"`
-	// Other processes of the same user can't attach to it or read its memory (Linux)
+	// Other processes of the same user can't attach to it or read its memory (Linux, Windows)
 	NoMemoryReads bool `json:"noMemoryReads"`
+	// No code but Microsoft's can be loaded into it (Windows)
+	SignedCodeOnly bool `json:"signedCodeOnly"`
 }

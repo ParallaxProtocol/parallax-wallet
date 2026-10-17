@@ -905,8 +905,11 @@ const es: Dict = {
     "Además, las contraseñas, frases de recuperación y claves se borran de la memoria justo después de usarse.",
   "protect.process": "Protegida de otros programas",
   "protect.process.desc":
-    "El motor de la app nunca escribe su memoria en un informe de fallos, y otros programas no pueden leer su memoria.",
+    "El motor de la app nunca escribe su memoria en un informe de fallos, y otros programas no pueden leer su memoria sin permisos de administrador.",
   "protect.process.dumps": "El motor de la app nunca escribe su memoria en un informe de fallos.",
+  "protect.process.reads":
+    "Otros programas no pueden leer la memoria del motor de la app sin permisos de administrador.",
+  "protect.process.signed": "Solo se puede cargar en él código firmado por Microsoft.",
   "protect.autoLock": "Se bloquea sola",
   "protect.autoLock.desc": "La billetera se bloquea cuando no usas la app por un rato, según lo configurado arriba.",
   "protect.autoLock.never": "Configurado en nunca: la billetera queda desbloqueada hasta que la bloquees.",

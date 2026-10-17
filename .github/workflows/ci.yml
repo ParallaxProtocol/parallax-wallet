@@ -53,6 +53,29 @@ jobs:
           go vet ./...
           go test . && go test ./backend/ -run 'TestWalletUnderRuntimeSecret|TestHardenProcess'
 
+  # The backend's hardening on Windows (backend/harden_windows.go): a
+  # hardened process tried from another of the same user, as Settings'
+  # Security says it can't be read; built with cgo, as released, so the
+  # hardware wallets' USB code is what runs under it
+  windows-hardening:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.27"
+          check-latest: true
+
+      - name: Test
+        shell: bash
+        env:
+          GOPRIVATE: github.com/ParallaxProtocol/*
+          CGO_ENABLED: "1"
+        run: go test ./backend/ -run '^TestHardenProcess$' -count=1 -v
+
   frontend:
     runs-on: ubuntu-latest
     steps:

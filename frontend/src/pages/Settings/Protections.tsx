@@ -151,7 +151,19 @@ export default function Protections({ kind }: { kind: "security" | "privacy" }) 
         <Protection
           icon={ShieldCheck}
           title={t("protect.process")}
-          desc={backend.noMemoryReads ? t("protect.process.desc") : t("protect.process.dumps")}
+          desc={[
+            // What's in effect, and only that: both, or the one that held
+            t(
+              backend.noCoreDumps && backend.noMemoryReads
+                ? "protect.process.desc"
+                : backend.noCoreDumps
+                  ? "protect.process.dumps"
+                  : "protect.process.reads",
+            ),
+            backend.signedCodeOnly ? t("protect.process.signed") : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
           status={on}
         />
       )}

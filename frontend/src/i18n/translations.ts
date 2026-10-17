@@ -905,8 +905,10 @@ export const en: Dict = {
   "protect.memory.erase": "Passwords, recovery phrases and keys are also wiped from memory right after use.",
   "protect.process": "Shielded from other programs",
   "protect.process.desc":
-    "The app's engine never writes what's in its memory to a crash report, and other programs can't read its memory.",
+    "The app's engine never writes what's in its memory to a crash report, and other programs can't read its memory without administrator rights.",
   "protect.process.dumps": "The app's engine never writes what's in its memory to a crash report.",
+  "protect.process.reads": "Other programs can't read the app engine's memory without administrator rights.",
+  "protect.process.signed": "Only code signed by Microsoft can be loaded into it.",
   "protect.autoLock": "Locks itself",
   "protect.autoLock.desc": "The wallet locks when you haven't used the app for a while, as set above.",
   "protect.autoLock.never": "Set to never: the wallet stays unlocked until you lock it.",

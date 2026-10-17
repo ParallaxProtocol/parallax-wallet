@@ -39,8 +39,10 @@ export type WindowSecurity = {
 export type SecurityStatus = {
   /** No core dump is written if it crashes. */
   noCoreDumps: boolean;
-  /** Other processes of the same user can't attach to it or read its memory (Linux). */
+  /** Other processes of the same user can't attach to it or read its memory (Linux, Windows). */
   noMemoryReads: boolean;
+  /** No code but Microsoft's can be loaded into it (Windows). */
+  signedCodeOnly: boolean;
   /** Passwords, phrases and keys are wiped from memory after each call that carries them. */
   secretErasing: boolean;
   /** The processor has a hardware random source the kernel mixes in (Linux; elsewhere not known). */

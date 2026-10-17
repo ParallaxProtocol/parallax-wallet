@@ -907,8 +907,11 @@ const ptBR: Dict = {
   "protect.memory.erase": "Senhas, frases de recuperação e chaves também são apagadas da memória logo após o uso.",
   "protect.process": "Protegida de outros programas",
   "protect.process.desc":
-    "O motor do app nunca grava a memória dele em um relatório de falhas, e outros programas não conseguem ler essa memória.",
+    "O motor do app nunca grava a memória dele em um relatório de falhas, e outros programas não conseguem ler essa memória sem permissões de administrador.",
   "protect.process.dumps": "O motor do app nunca grava a memória dele em um relatório de falhas.",
+  "protect.process.reads":
+    "Outros programas não conseguem ler a memória do motor do app sem permissões de administrador.",
+  "protect.process.signed": "Só código assinado pela Microsoft pode ser carregado nele.",
   "protect.autoLock": "Bloqueia sozinha",
   "protect.autoLock.desc": "A carteira é bloqueada quando você fica um tempo sem usar o app, conforme definido acima.",
   "protect.autoLock.never": "Definido como nunca: a carteira fica desbloqueada até você bloqueá-la.",

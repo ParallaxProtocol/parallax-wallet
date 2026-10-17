@@ -927,8 +927,11 @@ const de: Dict = {
     "Passwörter, Wiederherstellungsphrasen und Schlüssel werden außerdem direkt nach Gebrauch aus dem Arbeitsspeicher gelöscht.",
   "protect.process": "Abgeschirmt von anderen Programmen",
   "protect.process.desc":
-    "Der Kern der App schreibt seinen Arbeitsspeicher nie in einen Absturzbericht, und andere Programme können ihn nicht auslesen.",
+    "Der Kern der App schreibt seinen Arbeitsspeicher nie in einen Absturzbericht, und andere Programme können ihn ohne Administratorrechte nicht auslesen.",
   "protect.process.dumps": "Der Kern der App schreibt seinen Arbeitsspeicher nie in einen Absturzbericht.",
+  "protect.process.reads":
+    "Andere Programme können den Arbeitsspeicher des App-Kerns ohne Administratorrechte nicht auslesen.",
+  "protect.process.signed": "Nur von Microsoft signierter Code kann in ihn geladen werden.",
   "protect.autoLock": "Sperrt sich selbst",
   "protect.autoLock.desc":
     "Die Wallet sperrt sich, wenn Sie die App eine Weile nicht verwendet haben – wie oben eingestellt.",
