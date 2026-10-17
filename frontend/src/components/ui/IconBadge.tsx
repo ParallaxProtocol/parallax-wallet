@@ -1,4 +1,4 @@
-import { forwardRef, type HTMLAttributes } from "react";
+import type { HTMLAttributes, Ref } from "react";
 import type { LucideIcon } from "lucide-react";
 import { TONE_WASH, type Tone } from "./tone";
 
@@ -14,13 +14,20 @@ const SIZE = {
  * notice or a card. The one place these circles are drawn, so they stay
  * alike across the app. It takes a ref and handlers, so a Tooltip can wrap it.
  */
-export const IconBadge = forwardRef<
-  HTMLSpanElement,
-  { icon: LucideIcon; tone?: Tone; size?: keyof typeof SIZE; className?: string } & Omit<
-    HTMLAttributes<HTMLSpanElement>,
-    "className"
-  >
->(function IconBadge({ icon: Icon, tone = "neutral", size = "md", className = "", ...rest }, ref) {
+export function IconBadge({
+  icon: Icon,
+  tone = "neutral",
+  size = "md",
+  className = "",
+  ref,
+  ...rest
+}: {
+  icon: LucideIcon;
+  tone?: Tone;
+  size?: keyof typeof SIZE;
+  className?: string;
+  ref?: Ref<HTMLSpanElement>;
+} & Omit<HTMLAttributes<HTMLSpanElement>, "className">) {
   const s = SIZE[size];
   return (
     <span
@@ -31,4 +38,4 @@ export const IconBadge = forwardRef<
       <Icon className={s.icon} />
     </span>
   );
-});
+}

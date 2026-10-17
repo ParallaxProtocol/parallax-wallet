@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes } from "react";
+import type { InputHTMLAttributes, Ref } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Search, X } from "lucide-react";
 import { FADE_OUT, GLIDE } from "../../lib/motion";
@@ -8,13 +8,20 @@ import { FADE_OUT, GLIDE } from "../../lib/motion";
  * magnifier, its clear button springing in once something's typed. It
  * takes an input's props and ref, so a combobox can be built on it.
  */
-export const SearchField = forwardRef<
-  HTMLInputElement,
-  { value: string; onClear: () => void; clearLabel: string; className?: string } & Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    "value" | "className"
-  >
->(function SearchField({ value, onClear, clearLabel, className = "", ...rest }, ref) {
+export function SearchField({
+  value,
+  onClear,
+  clearLabel,
+  className = "",
+  ref,
+  ...rest
+}: {
+  value: string;
+  onClear: () => void;
+  clearLabel: string;
+  className?: string;
+  ref?: Ref<HTMLInputElement>;
+} & Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "className">) {
   return (
     <div className={`relative ${className}`}>
       <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -44,4 +51,4 @@ export const SearchField = forwardRef<
       </AnimatePresence>
     </div>
   );
-});
+}

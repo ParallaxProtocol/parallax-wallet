@@ -123,7 +123,7 @@ export default function Settings() {
   // as Settings closes and before the node starts too
   const waiting = useRef<Partial<GUIConfig>>({});
   const saving = useRef(new Set<keyof GUIConfig>());
-  const waitTimer = useRef<ReturnType<typeof setTimeout>>();
+  const waitTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const flush = useRef<() => Promise<void>>(async () => {});
   useEffect(() => {
     const before = () => flush.current();

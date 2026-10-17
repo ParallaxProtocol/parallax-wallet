@@ -20,14 +20,14 @@
     "mersenne-twister": "1.1.0",
     "motion": "14.3.0",
     "qrcode-generator": "2.0.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "react-router-dom": "7.18.4"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
-    "@types/react": "^18.3.31",
-    "@types/react-dom": "^18.3.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "prettier": "3.6.2",
     "prettier-plugin-tailwindcss": "0.6.14",

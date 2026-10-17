@@ -46,7 +46,7 @@ export default function AssistantBar() {
   // way to the confirmation) never says it lost focus, and would hold the
   // bar open for good
   const section = useRef<HTMLElement>(null);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const pointer = useRef(false);
   const inside = () => pointer.current || !!section.current?.contains(document.activeElement);
   const hover = (pointed?: boolean) => {

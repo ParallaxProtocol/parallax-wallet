@@ -63,7 +63,7 @@ export function Tooltip({
 }) {
   const target = useRef<HTMLElement | null>(null);
   const tip = useRef<HTMLDivElement>(null);
-  const timer = useRef<number>();
+  const timer = useRef<number>(undefined);
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<Pos | null>(null);
 
@@ -123,7 +123,7 @@ export function Tooltip({
   const trigger = cloneElement(child, {
     ref: (el: HTMLElement | null) => {
       target.current = el;
-      const { ref } = child as any;
+      const { ref } = child.props;
       if (typeof ref === "function") ref(el);
       else if (ref) ref.current = el;
     },
