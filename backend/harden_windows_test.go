@@ -37,7 +37,8 @@ func TestHardenProcess(t *testing.T) {
 	if err := dropDebugPrivilege(); err != nil {
 		t.Fatalf("dropping the debug privilege: %v", err)
 	}
-	t.Logf("this process's token had SeDebugPrivilege: %v (enabled: %v); dropped, for it and the child", debugPrivilegeHeld, debugPrivilegeEnabled)
+	t.Logf("this process's token had SeDebugPrivilege: %v (enabled: %v); still has it after dropping: %v",
+		debugPrivilegeHeld, debugPrivilegeEnabled, debugPrivilegeLeft)
 	cmd := exec.Command(os.Args[0], "-test.run=^TestHardenProcess$")
 	cmd.Env = append(os.Environ(), hardenedChild+"=1")
 	cmd.Stderr = os.Stderr

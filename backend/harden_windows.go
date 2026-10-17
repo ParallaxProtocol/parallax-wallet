@@ -67,8 +67,9 @@ func HardenProcess() error {
 // debugPrivilegeHeld is whether the token had SeDebugPrivilege before
 // dropDebugPrivilege removed it, and whether it was enabled: an
 // administrator's process can start with it on, such as one a CI runner
-// starts (harden_windows_test.go says so when its check fails).
-var debugPrivilegeHeld, debugPrivilegeEnabled bool
+// starts (harden_windows_test.go says so). debugPrivilegeLeft is whether
+// the token still has it afterwards, which it shouldn't.
+var debugPrivilegeHeld, debugPrivilegeEnabled, debugPrivilegeLeft bool
 
 // dropDebugPrivilege removes SeDebugPrivilege from the process's token for
 // good. A token without it is left as it is.
@@ -82,19 +83,44 @@ func dropDebugPrivilege() error {
 	if err := windows.LookupPrivilegeValue(nil, windows.StringToUTF16Ptr("SeDebugPrivilege"), &luid); err != nil {
 		return err
 	}
-	remove := windows.Tokenprivileges{PrivilegeCount: 1}
-	remove.Privileges[0] = windows.LUIDAndAttributes{Luid: luid, Attributes: windows.SE_PRIVILEGE_REMOVED}
-	// What it was before: one privilege back if the token held it, none if not
-	var was windows.Tokenprivileges
-	var n uint32
-	if err := windows.AdjustTokenPrivileges(token, false, &remove, uint32(unsafe.Sizeof(was)), &was, &n); err != nil {
+	var err error
+	if debugPrivilegeHeld, debugPrivilegeEnabled, err = tokenPrivilege(token, luid); err != nil {
 		return err
 	}
-	if was.PrivilegeCount == 1 {
-		debugPrivilegeHeld = true
-		debugPrivilegeEnabled = was.Privileges[0].Attributes&windows.SE_PRIVILEGE_ENABLED != 0
+	if !debugPrivilegeHeld {
+		return nil
 	}
-	return nil
+	remove := windows.Tokenprivileges{PrivilegeCount: 1}
+	remove.Privileges[0] = windows.LUIDAndAttributes{Luid: luid, Attributes: windows.SE_PRIVILEGE_REMOVED}
+	if err := windows.AdjustTokenPrivileges(token, false, &remove, 0, nil, nil); err != nil {
+		return err
+	}
+	debugPrivilegeLeft, _, err = tokenPrivilege(token, luid)
+	if err == nil && debugPrivilegeLeft {
+		err = errors.New("still held after removing it")
+	}
+	return err
+}
+
+// tokenPrivilege reads whether a token holds a privilege, and whether
+// it's enabled, from the token's own list of them.
+func tokenPrivilege(token windows.Token, luid windows.LUID) (held, enabled bool, err error) {
+	var n uint32
+	// The list's size first, then the list
+	_ = windows.GetTokenInformation(token, windows.TokenPrivileges, nil, 0, &n)
+	if n == 0 {
+		return false, false, errors.New("token privileges: no size")
+	}
+	buf := make([]byte, n)
+	if err := windows.GetTokenInformation(token, windows.TokenPrivileges, &buf[0], n, &n); err != nil {
+		return false, false, err
+	}
+	for _, p := range (*windows.Tokenprivileges)(unsafe.Pointer(&buf[0])).AllPrivileges() {
+		if p.Luid == luid {
+			return true, p.Attributes&windows.SE_PRIVILEGE_ENABLED != 0, nil
+		}
+	}
+	return false, false, nil
 }
 
 // What other processes of the same user may do with this one: wait on it
