@@ -82,7 +82,13 @@ export default function MempoolList({ known }: { known?: { pending: number; queu
             placeholder={t("mempool.search")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Escape" && setQuery("")}
+            onKeyDown={(e) => {
+              if (e.key === "Escape" && query) {
+                // Only the search clears: not the node page around it
+                e.preventDefault();
+                setQuery("");
+              }
+            }}
             spellCheck={false}
             aria-label={t("mempool.search")}
           />

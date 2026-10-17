@@ -120,7 +120,8 @@ export default function NodeBar() {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      // What inside the page takes its own Escape (its search) keeps it
+      if (e.key === "Escape" && !e.defaultPrevented) setOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

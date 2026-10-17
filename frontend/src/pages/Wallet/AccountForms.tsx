@@ -8,7 +8,16 @@ import { useWallet } from "../../lib/wallet";
 import { useT } from "../../i18n";
 import { Modal, ModalForm } from "../../components/ui/Modal";
 import { Notice } from "../../components/ui/bits";
-import { Address, DrawnCheck, Field, NewPassword, PasswordInput, WalletPasswordPrompt } from "./common";
+import {
+  Address,
+  chosenPassword,
+  DrawnCheck,
+  Field,
+  NewPassword,
+  PasswordInput,
+  WalletPasswordPrompt,
+  type NewPasswordValue,
+} from "./common";
 import { AddressAvatar } from "../../components/ui/AddressAvatar";
 
 /**
@@ -157,12 +166,13 @@ function ChangePassword({ onClose }: { onClose: () => void }) {
   const t = useT();
   const wallet = useWallet();
   const [current, setCurrent] = useState("");
-  const [next, setNext] = useState("");
+  const [typed, setTyped] = useState<NewPasswordValue>({ password: "", again: "" });
+  const next = chosenPassword(typed);
   const { busy, error, run } = useBusy();
   useEffect(
     () => () => {
       setCurrent("");
-      setNext("");
+      setTyped({ password: "", again: "" });
     },
     [],
   );
@@ -200,7 +210,7 @@ function ChangePassword({ onClose }: { onClose: () => void }) {
       <Field label={t("wallet.password.current")}>
         {(id) => <PasswordInput id={id} value={current} onChange={setCurrent} />}
       </Field>
-      <NewPassword onChange={setNext} />
+      <NewPassword value={typed} onChange={setTyped} />
       {anyBackup && <Notice tone="info">{t("wallet.changePassword.oldBackups")}</Notice>}
       {error && <Notice tone="critical">{error}</Notice>}
     </ModalForm>

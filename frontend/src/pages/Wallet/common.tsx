@@ -118,31 +118,46 @@ export function PasswordInput({
   );
 }
 
+/** What's typed in NewPassword's two boxes. */
+export type NewPasswordValue = { password: string; again: string };
+
+const tooShort = (password: string) => password.length > 0 && [...password].length < MIN_PASSWORD;
+
+/** The password NewPassword's boxes choose: once both agree and it is long enough, else "". */
+export function chosenPassword({ password, again }: NewPasswordValue): string {
+  return password && !tooShort(password) && password === again ? password : "";
+}
+
 /**
  * NewPassword is the pair of boxes for choosing a password: typed twice,
- * at least MIN_PASSWORD characters. It reports the password once both
- * agree and it is long enough, else "".
+ * at least MIN_PASSWORD characters. What's typed is held by the form
+ * around it, so it outlasts the boxes (a form swapped for its spinner
+ * while it saves, and back on an error).
  */
-export function NewPassword({ onChange, label }: { onChange: (password: string) => void; label?: string }) {
+export function NewPassword({
+  value,
+  onChange,
+  label,
+}: {
+  value: NewPasswordValue;
+  onChange: (value: NewPasswordValue) => void;
+  label?: string;
+}) {
   const t = useT();
-  const [a, setA] = useState("");
-  const [b, setB] = useState("");
-  const short = a.length > 0 && [...a].length < MIN_PASSWORD;
-  const mismatch = b.length > 0 && a !== b;
-  useEffect(() => {
-    onChange(!short && a.length > 0 && a === b ? a : "");
-  }, [a, b, short, onChange]);
+  const mismatch = value.again.length > 0 && value.password !== value.again;
   return (
     <>
       <Field
         label={label ?? t("wallet.password.new")}
         hint={t("wallet.password.rule", { n: MIN_PASSWORD })}
-        error={short ? t("wallet.err.weakPassword") : null}
+        error={tooShort(value.password) ? t("wallet.err.weakPassword") : null}
       >
-        {(id) => <PasswordInput id={id} value={a} onChange={setA} isNew />}
+        {(id) => (
+          <PasswordInput id={id} value={value.password} onChange={(p) => onChange({ ...value, password: p })} isNew />
+        )}
       </Field>
       <Field label={t("wallet.password.confirm")} error={mismatch ? t("wallet.password.mismatch") : null}>
-        {(id) => <PasswordInput id={id} value={b} onChange={setB} isNew />}
+        {(id) => <PasswordInput id={id} value={value.again} onChange={(p) => onChange({ ...value, again: p })} isNew />}
       </Field>
     </>
   );

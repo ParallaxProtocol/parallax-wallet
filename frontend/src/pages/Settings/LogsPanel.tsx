@@ -103,7 +103,13 @@ export default function LogsPanel() {
             placeholder={t("logs.filter")}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            onKeyDown={(e) => e.key === "Escape" && setFilter("")}
+            onKeyDown={(e) => {
+              if (e.key === "Escape" && filter) {
+                // Only the filter clears: not the Settings panel around it
+                e.preventDefault();
+                setFilter("");
+              }
+            }}
           />
         </div>
         <Pill tone={paused ? "neutral" : "good"} className="gap-1.5">

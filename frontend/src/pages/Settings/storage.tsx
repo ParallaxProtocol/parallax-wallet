@@ -73,9 +73,10 @@ export function WalletStorage() {
 /**
  * WipeWallet is Settings' Storage's last group, apart from the rest as
  * what can't be undone: wiping the whole wallet. Only a wallet with a
- * password has anything to wipe.
+ * password has anything to wipe; once wiped (onWiped), it is kept on
+ * screen by the page around it, its dialog saying the app restarts.
  */
-export function WipeWallet() {
+export function WipeWallet({ onWiped }: { onWiped: () => void }) {
   const t = useT();
   const [wiping, setWiping] = useState(false);
   return (
@@ -97,7 +98,7 @@ export function WipeWallet() {
         </div>
       </Panel>
       <p className="px-1 text-sm text-muted-foreground">{t("storage.danger.note")}</p>
-      <WipeModal open={wiping} onClose={() => setWiping(false)} />
+      <WipeModal open={wiping} onClose={() => setWiping(false)} onWiped={onWiped} />
     </>
   );
 }
@@ -287,7 +288,7 @@ function ClearChainModal({ open, onClose }: { open: boolean; onClose: () => void
  * wallet password. The app then restarts (app.go), as on a first launch,
  * to set a new password; the dialog stays until it does.
  */
-function WipeModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function WipeModal({ open, onClose, onWiped }: { open: boolean; onClose: () => void; onWiped: () => void }) {
   const t = useT();
   const [restarting, setRestarting] = useState(false);
   return (
@@ -298,7 +299,16 @@ function WipeModal({ open, onClose }: { open: boolean; onClose: () => void }) {
       icon={<Trash2 className="size-4" />}
       tone="danger"
     >
-      {open && <Wipe onClose={onClose} restarting={restarting} onWiped={() => setRestarting(true)} />}
+      {open && (
+        <Wipe
+          onClose={onClose}
+          restarting={restarting}
+          onWiped={() => {
+            setRestarting(true);
+            onWiped();
+          }}
+        />
+      )}
     </Modal>
   );
 }

@@ -164,6 +164,8 @@ export default function Settings() {
   const hidden = (id: SettingsSection) =>
     (offline && (NODE_SECTIONS.has(id) || id === "privacy")) || (id === "security" && !walletInfo?.hasPassword);
   const section = !hidden(chosen) ? chosen : chosen === "security" ? "accounts" : "general";
+  // A wiped wallet has no password, but its dialog stays, saying the app restarts, until it does
+  const [wiped, setWiped] = useState(false);
   const [login, setLogin] = useState<{ supported: boolean; enabled: boolean }>({ supported: false, enabled: false });
   const swap = usePageSwap();
 
@@ -463,9 +465,9 @@ export default function Settings() {
                 {/* An offline signer has no node, nor its data */}
                 {!offline && nodeStorage(t("nav.node"), true)}
                 {/* Last, apart from the rest: what can't be undone */}
-                {walletInfo?.hasPassword && (
+                {(walletInfo?.hasPassword || wiped) && (
                   <Group title={t("storage.danger")}>
-                    <WipeWallet />
+                    <WipeWallet onWiped={() => setWiped(true)} />
                   </Group>
                 )}
               </>

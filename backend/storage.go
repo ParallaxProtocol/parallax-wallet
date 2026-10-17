@@ -318,7 +318,8 @@ func (n *NodeController) ClearChainData(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		root := filepath.Clean(g.DataDir)
+		// The folder the node runs in: the development chain's own, beside the configured one
+		root := filepath.Clean(nodeCfg.DataDir)
 		var paths []string
 		chain := nodeCfg.ResolvePath("chaindata")
 		// The history index is built from the chain: it goes with it
@@ -347,7 +348,7 @@ func (n *NodeController) ClearChainData(ctx context.Context) error {
 				}
 			}
 		}
-		logging.Info("Cleared the node's chain data", "datadir", g.DataDir)
+		logging.Info("Cleared the node's chain data", "datadir", root)
 		return nil
 	})
 }
