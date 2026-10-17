@@ -9,6 +9,93 @@ import { contextBridge, ipcRenderer } from "electron";
 type Listener = (data: unknown) => void;
 const listeners = new Map<string, Set<Listener>>();
 
+/**
+ * Calls go to the backend sealed (bridge_seal.go): passwords, recovery
+ * phrases and keys, and what comes back, pass through the shell's main
+ * process encrypted, never in the clear. A session's key comes of an
+ * X25519 exchange with the backend, derived here into an AES-256-GCM key
+ * that can't be read back out of Web Crypto, nor leaves this process.
+ */
+const SEAL_INFO = "parallax-bridge-seal 1";
+const UNKNOWN_SESSION = "sealed: unknown session";
+type Sealed = { s: string; n: string; c: string };
+type Session = { id: string; key: CryptoKey };
+const text = new TextEncoder();
+const subtle = globalThis.crypto.subtle;
+
+const toBase64 = (bytes: Uint8Array) => {
+  let s = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
+const fromBase64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+async function invoke(method: string, args: unknown[]) {
+  return (await ipcRenderer.invoke("backend:call", method, args)) as { result?: any; error?: string };
+}
+
+/** Opens a sealed session with the backend. */
+async function openSession(): Promise<Session> {
+  const pair = (await subtle.generateKey({ name: "X25519" }, false, ["deriveBits"])) as CryptoKeyPair;
+  const own = new Uint8Array(await subtle.exportKey("raw", pair.publicKey));
+  const res = await invoke("BridgeOpen", [toBase64(own)]);
+  if (res.error) throw new Error(res.error);
+  const theirs = fromBase64(res.result.key);
+  const peer = await subtle.importKey("raw", theirs, { name: "X25519" }, false, []);
+  const shared = new Uint8Array(await subtle.deriveBits({ name: "X25519", public: peer }, pair.privateKey, 256));
+  const material = await subtle.importKey("raw", shared, "HKDF", false, ["deriveKey"]);
+  shared.fill(0);
+  const salt = new Uint8Array(own.length + theirs.length);
+  salt.set(own);
+  salt.set(theirs, own.length);
+  const key = await subtle.deriveKey(
+    { name: "HKDF", hash: "SHA-256", salt, info: text.encode(SEAL_INFO) },
+    material,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"],
+  );
+  return { id: res.result.session, key };
+}
+
+// One session for every call, opened on the first and again if the backend loses it
+let session: Promise<Session> | null = null;
+
+/** A call to the backend, sealed both ways. */
+async function sealedCall(method: string, args: unknown[]): Promise<{ result?: unknown; error?: string }> {
+  for (let attempt = 0; ; attempt++) {
+    const current = (session ??= openSession().catch((e) => {
+      session = null;
+      throw e;
+    }));
+    const { id, key } = await current;
+    const plain = text.encode(JSON.stringify({ method, args }));
+    const iv = globalThis.crypto.getRandomValues(new Uint8Array(12));
+    const sealed = new Uint8Array(
+      await subtle.encrypt({ name: "AES-GCM", iv, additionalData: text.encode("call") }, key, plain),
+    );
+    plain.fill(0);
+    const res = await invoke("Sealed", [{ s: id, n: toBase64(iv), c: toBase64(sealed) } satisfies Sealed]);
+    if (res.error === UNKNOWN_SESSION && attempt === 0) {
+      // The backend started again: a new session, and the call once more
+      if (session === current) session = null;
+      continue;
+    }
+    if (res.error) return { error: res.error };
+    const back = res.result as Sealed;
+    const opened = new Uint8Array(
+      await subtle.decrypt(
+        { name: "AES-GCM", iv: fromBase64(back.n), additionalData: text.encode("result") },
+        key,
+        fromBase64(back.c),
+      ),
+    );
+    const response = JSON.parse(new TextDecoder().decode(opened));
+    opened.fill(0);
+    return response;
+  }
+}
+
 ipcRenderer.on("backend:event", (_e, name: string, data: unknown) => {
   listeners.get(name)?.forEach((cb) => cb(data));
 });
@@ -16,7 +103,7 @@ ipcRenderer.on("backend:event", (_e, name: string, data: unknown) => {
 contextBridge.exposeInMainWorld("parallax", {
   /** Calls a backend method (an exported method of App in app.go). */
   async call(method: string, args: unknown[]): Promise<unknown> {
-    const res = (await ipcRenderer.invoke("backend:call", method, args)) as { result?: unknown; error?: string };
+    const res = await sealedCall(method, args);
     if (res.error) throw new Error(res.error);
     return res.result;
   },

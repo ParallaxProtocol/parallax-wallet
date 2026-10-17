@@ -81,6 +81,8 @@ type bridge struct {
 	hub     *hub
 	token   string
 	methods map[string]reflect.Value
+	// The window's sealed sessions (bridge_seal.go)
+	sessions sealSessions
 }
 
 func newBridge(app *App, h *hub) (*bridge, error) {
@@ -198,11 +200,19 @@ func (b *bridge) handleCall(w http.ResponseWriter, r *http.Request) {
 	}
 	var status int
 	var out []byte
-	respond := func() { status, out = b.respond(body) }
-	if secretMethods[head.Method] {
-		erasing(respond)
-	} else {
-		respond()
+	switch {
+	// The window's calls, sealed past the shell (bridge_seal.go): opening a
+	// session derives its key, erased; a sealed call is erased if it's a
+	// secret one, as it would be plain
+	case head.Method == sealOpenMethod:
+		erasing(func() { status, out = b.handleOpen(body) })
+	case head.Method == sealedMethod:
+		status, out = b.handleSealed(body)
+	// A secret one comes sealed, never through the shell in the clear
+	case secretMethods[head.Method]:
+		status, out = marshalResponse(http.StatusForbidden, callResponse{Error: head.Method + " must be sealed"})
+	default:
+		status, out = b.respond(body)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

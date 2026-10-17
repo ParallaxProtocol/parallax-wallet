@@ -37,9 +37,9 @@ func TestHandleCall(t *testing.T) {
 	if code, out := call(`{"method":"Profile","args":[]}`); code != http.StatusOK || !strings.HasPrefix(out, `{"result":`) {
 		t.Errorf("Profile: %d %s", code, out)
 	}
-	// A secret method runs too, under erasing; with no wallet it says so
-	if code, out := call(`{"method":"WalletSetupPassword","args":["correct horse battery"]}`); code != http.StatusOK || !strings.Contains(out, `"error":`) {
-		t.Errorf("WalletSetupPassword: %d %s", code, out)
+	// A secret method isn't served in the clear: it comes sealed (TestSealedCall)
+	if code, out := call(`{"method":"WalletSetupPassword","args":["correct horse battery"]}`); code != http.StatusForbidden || !strings.Contains(out, "must be sealed") {
+		t.Errorf("WalletSetupPassword in the clear: %d %s", code, out)
 	}
 	if code, out := call(`{"method":`); code != http.StatusBadRequest {
 		t.Errorf("malformed: %d %s", code, out)
