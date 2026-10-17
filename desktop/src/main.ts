@@ -15,6 +15,8 @@ import {
   powerMonitor,
   powerSaveBlocker,
   protocol,
+  Rectangle,
+  screen,
   shell,
   session,
   systemPreferences,
@@ -391,11 +393,45 @@ function recolorWindow(win: BrowserWindow) {
   win.setTitleBarOverlay(next.overlay);
 }
 
+/** Where the window's size and place are kept between launches. */
+const WINDOW_STATE_FILE = path.join(app.getPath("userData"), "window.json");
+
+type WindowState = Rectangle & { maximized?: boolean };
+
+/**
+ * The window's size and place: as it was left, if that still shows on one of
+ * the screens, else 1440×900 (no more than the screen has room for) centred.
+ */
+function windowState(): Partial<WindowState> {
+  try {
+    const s = JSON.parse(fs.readFileSync(WINDOW_STATE_FILE, "utf8")) as WindowState;
+    const onScreen = screen.getAllDisplays().some(({ workArea: a }) => {
+      const w = Math.min(s.x + s.width, a.x + a.width) - Math.max(s.x, a.x);
+      const h = Math.min(s.y + s.height, a.y + a.height) - Math.max(s.y, a.y);
+      return w >= 100 && h >= 100;
+    });
+    if (onScreen && s.width > 0 && s.height > 0) return s;
+  } catch {
+    // none saved yet, or unreadable: the default
+  }
+  const area = screen.getPrimaryDisplay().workAreaSize;
+  return { width: Math.min(1440, area.width - 40), height: Math.min(900, area.height - 40) };
+}
+
+function saveWindowState(win: BrowserWindow) {
+  try {
+    const state: WindowState = { ...win.getNormalBounds(), maximized: win.isMaximized() };
+    fs.writeFileSync(WINDOW_STATE_FILE, JSON.stringify(state));
+  } catch {
+    // not kept: the next launch opens at the default
+  }
+}
+
 function createWindow() {
   const look = chrome();
+  const { maximized, ...bounds } = windowState();
   const win = new BrowserWindow({
-    width: 1280,
-    height: 820,
+    ...bounds,
     minWidth: 900,
     minHeight: 600,
     show: false,
@@ -416,7 +452,11 @@ function createWindow() {
   // A profile's name stays in the title, for telling the copies apart
   if (PROFILE) win.on("page-title-updated", (e) => e.preventDefault());
   mainWindow = win;
-  win.once("ready-to-show", () => win.show());
+  win.once("ready-to-show", () => {
+    if (maximized) win.maximize();
+    win.show();
+  });
+  win.on("close", () => saveWindowState(win));
   const recolor = () => recolorWindow(win);
   nativeTheme.on("updated", recolor);
   win.on("closed", () => {
