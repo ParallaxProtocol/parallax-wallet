@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
@@ -134,22 +135,97 @@ const processOthersMay = windows.SYNCHRONIZE | windows.PROCESS_QUERY_INFORMATION
 // for its user and its owner, and everything for SYSTEM, protected from
 // inheriting anything else.
 func restrictProcessAccess() error {
-	user, err := windows.GetCurrentProcessToken().GetTokenUser()
+	dacl, err := restrictedDACL()
 	if err != nil {
 		return err
+	}
+	return setProcessDACL(windows.CurrentProcess(), dacl)
+}
+
+func restrictedDACL() (*windows.ACL, error) {
+	user, err := windows.GetCurrentProcessToken().GetTokenUser()
+	if err != nil {
+		return nil, err
 	}
 	sddl := fmt.Sprintf("D:P(A;;%#x;;;OW)(A;;%#x;;;%s)(A;;GA;;;SY)",
 		processOthersMay, processOthersMay, user.User.Sid.String())
 	sd, err := windows.SecurityDescriptorFromString(sddl)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	dacl, _, err := sd.DACL()
+	return dacl, err
+}
+
+func setProcessDACL(process windows.Handle, dacl *windows.ACL) error {
+	return windows.SetSecurityInfo(process, windows.SE_KERNEL_OBJECT,
+		windows.DACL_SECURITY_INFORMATION|windows.PROTECTED_DACL_SECURITY_INFORMATION, nil, nil, dacl, nil)
+}
+
+// shellHardened are the shell's processes HardenShell has given the
+// access list: past that, not even this process may change it again.
+var (
+	shellMu       sync.Mutex
+	shellHardened = map[uint32]bool{}
+)
+
+// HardenShell gives the shell's own processes the access list the
+// backend gives itself (restrictProcessAccess): its main process, which
+// holds the bridge's token, and the window's, which holds what's typed in
+// it. Only the shell's processes are taken: this process's parent, and
+// that parent's children. Each is given it once.
+func HardenShell(pids []int) error {
+	shell := uint32(os.Getppid())
+	parents, err := parentPIDs()
 	if err != nil {
 		return err
 	}
-	return windows.SetSecurityInfo(windows.CurrentProcess(), windows.SE_KERNEL_OBJECT,
-		windows.DACL_SECURITY_INFORMATION|windows.PROTECTED_DACL_SECURITY_INFORMATION, nil, nil, dacl, nil)
+	dacl, err := restrictedDACL()
+	if err != nil {
+		return err
+	}
+	shellMu.Lock()
+	defer shellMu.Unlock()
+	var errs []error
+	for _, p := range pids {
+		pid := uint32(p)
+		if p <= 0 || (pid != shell && parents[pid] != shell) {
+			errs = append(errs, fmt.Errorf("process %d isn't the shell's", p))
+			continue
+		}
+		if shellHardened[pid] {
+			continue
+		}
+		h, err := windows.OpenProcess(windows.WRITE_DAC|windows.READ_CONTROL, false, pid)
+		if err == nil {
+			err = setProcessDACL(h, dacl)
+			windows.CloseHandle(h)
+		}
+		if err != nil {
+			errs = append(errs, fmt.Errorf("process %d: %w", p, err))
+			continue
+		}
+		shellHardened[pid] = true
+	}
+	return errors.Join(errs...)
+}
+
+// parentPIDs maps each running process to its parent's ID.
+func parentPIDs() (map[uint32]uint32, error) {
+	snap, err := windows.CreateToolhelp32Snapshot(windows.TH32CS_SNAPPROCESS, 0)
+	if err != nil {
+		return nil, err
+	}
+	defer windows.CloseHandle(snap)
+	parents := map[uint32]uint32{}
+	entry := windows.ProcessEntry32{Size: uint32(unsafe.Sizeof(windows.ProcessEntry32{}))}
+	for err = windows.Process32First(snap, &entry); err == nil; err = windows.Process32Next(snap, &entry) {
+		parents[entry.ProcessID] = entry.ParentProcessID
+	}
+	if !errors.Is(err, windows.ERROR_NO_MORE_FILES) {
+		return nil, err
+	}
+	return parents, nil
 }
 
 var (

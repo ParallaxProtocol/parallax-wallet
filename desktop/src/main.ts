@@ -427,6 +427,22 @@ function saveWindowState(win: BrowserWindow) {
   }
 }
 
+/**
+ * On Windows, the backend gives the shell's own processes the access list
+ * it gives itself (backend/harden_windows.go HardenShell): other programs
+ * of the user may wait on them, ask about them and end them, not read or
+ * write their memory. This process holds the bridge's token, the window's
+ * what's typed in it. Elsewhere one process can't do this for another.
+ */
+function shieldShell(win: BrowserWindow) {
+  if (!isWindows || win.isDestroyed()) return;
+  const pids = [process.pid, win.webContents.getOSProcessId()];
+  backend
+    .call("HardenShell", [pids])
+    .then((res) => res.error && console.error(`shielding the shell: ${res.error}`))
+    .catch(() => {});
+}
+
 function createWindow() {
   const look = chrome();
   const { maximized, ...bounds } = windowState();
@@ -452,6 +468,8 @@ function createWindow() {
   // A profile's name stays in the title, for telling the copies apart
   if (PROFILE) win.on("page-title-updated", (e) => e.preventDefault());
   mainWindow = win;
+  // Each time the page loads (a reload may bring a new renderer process)
+  win.webContents.on("did-finish-load", () => shieldShell(win));
   win.once("ready-to-show", () => {
     if (maximized) win.maximize();
     win.show();

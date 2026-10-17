@@ -85,3 +85,7 @@ func processDiskBytes() (read, written uint64, ok bool) {
 	}
 	return read, written, seen == 2
 }
+
+// HardenShell has nothing to do here: a process can only make itself
+// non-dumpable, not another.
+func HardenShell(pids []int) error { return nil }

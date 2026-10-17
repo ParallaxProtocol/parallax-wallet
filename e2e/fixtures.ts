@@ -73,9 +73,15 @@ function seedConfig(home: string, seed: Seed, extra: Record<string, unknown>) {
   });
 }
 
+/** Where the app keeps its config and wallet in `home`: the user's config directory, as Go's os.UserConfigDir has it. */
+export const configDir = (home: string) =>
+  process.platform === "win32"
+    ? path.join(home, "AppData", "Roaming", "Parallax")
+    : path.join(home, ".config", "Parallax");
+
 /** Writes the app's config (gui.json) in `home`, for an app about to be launched there. */
 export function writeConfig(home: string, cfg: Record<string, unknown>) {
-  const dir = path.join(home, ".config", "Parallax");
+  const dir = configDir(home);
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   fs.writeFileSync(path.join(dir, "gui.json"), JSON.stringify(cfg, null, 2));
 }
@@ -93,7 +99,8 @@ export async function launchApp(home: string): Promise<ElectronApplication> {
       "--disable-renderer-backgrounding",
       "--disable-backgrounding-occluded-windows",
       "--disable-background-timer-throttling",
-      ...(process.env.CI ? ["--no-sandbox"] : []),
+      // Linux CI runners can't give Chromium its sandbox; elsewhere it stays, as released
+      ...(process.env.CI && process.platform === "linux" ? ["--no-sandbox"] : []),
     ],
     env: {
       ...process.env,
@@ -101,6 +108,12 @@ export async function launchApp(home: string): Promise<ElectronApplication> {
       XDG_CONFIG_HOME: path.join(home, ".config"),
       XDG_DATA_HOME: path.join(home, ".local", "share"),
       XDG_CACHE_HOME: path.join(home, ".cache"),
+      // Windows' per-user folders, where the app, the backend and the node keep their state there
+      ...(process.platform === "win32" && {
+        USERPROFILE: home,
+        APPDATA: path.join(home, "AppData", "Roaming"),
+        LOCALAPPDATA: path.join(home, "AppData", "Local"),
+      }),
       // The development build: the development chain may run (backend/devchain.go)
       PARALLAX_DEV: "1",
       LANG: "en_US.UTF-8",

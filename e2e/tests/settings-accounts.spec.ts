@@ -1,6 +1,7 @@
 import fs from "node:fs";
+import path from "node:path";
 import type { Page } from "@playwright/test";
-import { test, expect, call, answerDialogs, unlockForm, FUNDED, OTHER, PASSWORD } from "../fixtures";
+import { test, expect, call, answerDialogs, unlockForm, FUNDED, OTHER, PASSWORD, configDir } from "../fixtures";
 import { accountRow, answerQuiz, dialog, openSettings, revealedWords, rowAction } from "./helpers/accounts";
 
 // Settings' Accounts section: the accounts the wallet holds, grouped by
@@ -469,7 +470,7 @@ test.describe("wallet security", () => {
       const info = await call<{ accounts: unknown[]; hasPassword: boolean }>(page, "WalletInfo");
       expect(info.accounts).toHaveLength(0);
       expect(info.hasPassword).toBe(false);
-      expect(fs.readdirSync(`${home}/.config/Parallax/keystore`).filter((f) => !f.startsWith("."))).toEqual([]);
+      expect(fs.readdirSync(path.join(configDir(home), "keystore")).filter((f) => !f.startsWith("."))).toEqual([]);
 
       // Started again, the app asks for a new password, as on a first launch
       await page.reload();

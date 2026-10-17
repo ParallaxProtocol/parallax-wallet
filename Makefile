@@ -99,7 +99,8 @@ XVFB_RUN := $(shell command -v xvfb-run 2>/dev/null)
 E2E_DISPLAY := $(if $(and $(XVFB_RUN),$(if $(E2E_HEADED),,1)),env -u WAYLAND_DISPLAY XDG_SESSION_TYPE=x11 xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24",)
 
 e2e: backend frontend desktop-deps
-	cd desktop && npm run build
+	# Electron fetches its binary on first use: here, once, not by each test worker at once
+	cd desktop && npm run build && node -e "require('electron')"
 	cd e2e && npm ci && $(E2E_DISPLAY) npx playwright test $(E2E_ARGS)
 
 clean:

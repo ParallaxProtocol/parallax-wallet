@@ -285,6 +285,11 @@ type SecurityStatus struct {
 	HardwareRandom bool `json:"hardwareRandom"`
 }
 
+// HardenShell shields the shell's own processes, its main process and its
+// window's, as the backend shields itself, where the system lets one
+// process do it for another (Windows); elsewhere there's nothing to do.
+func (a *App) HardenShell(pids []int) error { return backend.HardenShell(pids) }
+
 func (a *App) SecurityStatus() SecurityStatus {
 	return SecurityStatus{
 		ProcessGuard:   backend.ProcessGuarded(),

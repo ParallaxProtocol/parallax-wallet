@@ -32,3 +32,7 @@ func ProcessGuarded() ProcessGuard {
 
 // processDiskBytes reads nothing here: the daemon's disk metrics stand.
 func processDiskBytes() (read, written uint64, ok bool) { return 0, 0, false }
+
+// HardenShell has nothing to do here: one process can't restrict
+// another's access the way Windows lets it.
+func HardenShell(pids []int) error { return nil }

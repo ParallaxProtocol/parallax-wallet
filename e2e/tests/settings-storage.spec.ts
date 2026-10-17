@@ -1,12 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
-import { test, expect, answerDialogs, call, nodeRunning, PASSWORD } from "../fixtures";
+import { test, expect, answerDialogs, call, nodeRunning, PASSWORD, configDir } from "../fixtures";
 import { config, openSettings, row, savedAs, sheet } from "./helpers/settings";
 
 test("Storage shows where the wallet and the node keep their data", async ({ page, home }) => {
   await openSettings(page, "Storage");
   const folder = row(sheet(page), "Wallet folder");
-  await expect(folder).toContainText(path.join(home, ".config", "Parallax"));
+  await expect(folder).toContainText(configDir(home));
   await expect(
     sheet(page).getByRole("button", { name: `Data directory: ${path.join(home, ".parallax")}` }),
   ).toBeVisible();
