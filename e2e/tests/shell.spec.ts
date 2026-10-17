@@ -139,6 +139,14 @@ test("the node bar opens into the node's page and closes again", async ({ page }
   await expect(bar.getByRole("button", { name: /^Peers: Hide$/ })).toBeVisible();
   await bar.getByRole("button", { name: /^Peers: Hide$/ }).click();
 
+  // Escape in the mempool's search clears it, and only it: the page stays open
+  await bar.getByRole("button", { name: /^Mempool: View$/ }).click();
+  const search = bar.getByRole("textbox", { name: "Search by hash or address" });
+  await search.fill("0xabc");
+  await search.press("Escape");
+  await expect(search).toHaveValue("");
+  await expect(bar.getByRole("button", { name: "Hide the node" })).toHaveAttribute("aria-expanded", "true");
+
   await page.keyboard.press("Escape");
   await expect(bar.getByRole("button", { name: "Show the node" })).toHaveAttribute("aria-expanded", "false");
 });

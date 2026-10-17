@@ -103,10 +103,11 @@ jobs:
       - name: Install a virtual display
         run: sudo apt-get update && sudo apt-get install -y xvfb
 
+      # make e2e runs them under xvfb-run, installed above
       - name: Build and test
         env:
           GOPRIVATE: github.com/ParallaxProtocol/*
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" make e2e
+        run: make e2e
 
       - name: Keep the report
         if: failure()

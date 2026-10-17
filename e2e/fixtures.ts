@@ -111,8 +111,14 @@ export async function launchApp(home: string): Promise<ElectronApplication> {
 /** The app's first window, sized as every test sees it, once the backend answers calls. */
 export async function mainWindow(app: ElectronApplication): Promise<Page> {
   const page = await app.firstWindow();
-  // One size everywhere, whatever the screen, so layouts match locally and in CI
-  await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]?.setSize(1440, 900));
+  await app.evaluate(({ BrowserWindow }) => {
+    const win = BrowserWindow.getAllWindows()[0];
+    // One size everywhere, whatever the screen, so layouts match locally and in CI
+    win?.setSize(1440, 900);
+    // Frames keep coming for a window under the others' (Electron pauses them otherwise),
+    // which Playwright waits on to see an element hold still
+    win?.webContents.setBackgroundThrottling(false);
+  });
   await backendReady(page);
   return page;
 }
@@ -252,4 +258,19 @@ export async function refresh(page: Page) {
  */
 export async function expectClipboard(app: ElectronApplication, text: string) {
   await expect.poll(() => app.evaluate(({ clipboard }) => clipboard.readText())).toBe(text);
+}
+
+/**
+ * Brings in the lock screen's password form, as the first key typed does
+ * once the wallet is locked by hand, and returns its field holding that
+ * key ("x"). The key is pressed again until the form shows: one typed
+ * before the lock screen listens is lost.
+ */
+export async function unlockForm(page: Page) {
+  const field = page.getByLabel("Wallet password");
+  await expect(async () => {
+    await page.keyboard.press("x");
+    await expect(field).toBeVisible({ timeout: 1_000 });
+  }).toPass();
+  return field;
 }

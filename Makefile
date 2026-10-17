@@ -90,10 +90,17 @@ dev:
 
 # e2e runs the end-to-end tests (e2e/): the real app, built as it is
 # here, each test in a home of its own on the development chain. Pass
-# Playwright's arguments in E2E_ARGS (make e2e E2E_ARGS="tests/send.spec.ts")
+# Playwright's arguments in E2E_ARGS (make e2e E2E_ARGS="tests/send.spec.ts").
+# Where xvfb-run is installed they run on a virtual display, as in CI: the
+# test windows stay off the desktop, and none goes unpainted under the
+# others (a Wayland compositor stops painting a covered window, and a test
+# waiting on it times out). E2E_HEADED=1 shows them instead.
+XVFB_RUN := $(shell command -v xvfb-run 2>/dev/null)
+E2E_DISPLAY := $(if $(and $(XVFB_RUN),$(if $(E2E_HEADED),,1)),env -u WAYLAND_DISPLAY XDG_SESSION_TYPE=x11 xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24",)
+
 e2e: backend frontend desktop-deps
 	cd desktop && npm run build
-	cd e2e && npm ci && npx playwright test $(E2E_ARGS)
+	cd e2e && npm ci && $(E2E_DISPLAY) npx playwright test $(E2E_ARGS)
 
 clean:
 	rm -rf build/backend build/package build/tor frontend/dist desktop/dist e2e/test-results e2e/playwright-report

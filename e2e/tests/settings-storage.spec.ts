@@ -45,9 +45,6 @@ test("a cancelled folder pick moves nothing", async ({ app, page, home }) => {
 });
 
 test("the chain data is deleted once confirmed, and the node runs again", async ({ page }) => {
-  // App bug: on the development chain the backend checks the chain against the configured
-  // data directory, not the chain's own (<dataDir>-dev/<address>), and refuses to delete it
-  test.fail();
   await nodeRunning(page);
   await openSettings(page, "Storage");
   await row(sheet(page), "Delete chain data").getByRole("button", { name: "Delete" }).click();

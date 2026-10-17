@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { test, expect, call, answerDialogs, goTo, nodeRunning, FUNDED, OTHER, PASSWORD } from "../fixtures";
+import { test, expect, call, answerDialogs, goTo, nodeRunning, unlockForm, FUNDED, OTHER, PASSWORD } from "../fixtures";
 import { launchSigner, openFile, setClipboard } from "./helpers/offline";
 import type { Page } from "@playwright/test";
 
@@ -223,11 +223,7 @@ test.describe("signer mode", () => {
       // Locked, it signs nothing until the password is given
       await page.getByRole("button", { name: "Lock wallet" }).click();
       // Locked by hand, the first key typed brings its form in
-      const password = page.getByLabel("Wallet password");
-      await expect(async () => {
-        await page.keyboard.press("x");
-        await expect(password).toBeVisible({ timeout: 1000 });
-      }).toPass();
+      const password = await unlockForm(page);
       await password.fill("not the password");
       await page.getByRole("button", { name: "Unlock" }).click();
       await expect(page.getByText("Wrong password.")).toBeVisible();

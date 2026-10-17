@@ -32,8 +32,11 @@ test("the logs show the node's and the app's lines, filtered, paused and cleared
   await expect(logs.getByText(/Allocated cache and file handles/)).toHaveCount(0);
   await filter.fill("nothing logs this line");
   await expect(logs.getByText("No log lines yet.")).toBeVisible();
-  await filter.fill("");
+  // Escape clears the filter, and only the filter: Settings stays open
+  await filter.press("Escape");
+  await expect(filter).toHaveValue("");
   await expect(logs.getByText(/Allocated cache and file handles/).first()).toBeVisible();
+  await expect(sheet(page)).toBeVisible();
 
   await logs.getByRole("button", { name: "Pause" }).click();
   await expect(logs.getByText("Paused", { exact: true })).toBeVisible();

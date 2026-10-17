@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import type { Page } from "@playwright/test";
-import { test, expect, call, answerDialogs, FUNDED, OTHER, PASSWORD } from "../fixtures";
+import { test, expect, call, answerDialogs, unlockForm, FUNDED, OTHER, PASSWORD } from "../fixtures";
 import { accountRow, answerQuiz, dialog, openSettings, revealedWords, rowAction } from "./helpers/accounts";
 
 // Settings' Accounts section: the accounts the wallet holds, grouped by
@@ -386,10 +386,11 @@ test.describe("wallet security", () => {
     await submit.click();
     await expect(change.getByText("Wrong password.")).toBeVisible();
 
-    // The check empties the new password's fields (it keeps the current one): typed again
+    // Back from the check, everything typed is kept: only the current password is put right
+    await expect(current).toHaveValue("not the password");
+    await expect(next).toHaveValue(NEW_PASSWORD);
+    await expect(again).toHaveValue(NEW_PASSWORD);
     await current.fill(PASSWORD);
-    await next.fill(NEW_PASSWORD);
-    await again.fill(NEW_PASSWORD);
     await submit.click();
     await expect(change).toBeHidden();
 
@@ -399,8 +400,7 @@ test.describe("wallet security", () => {
     // Locked by hand, the lock screen shows the name alone; the field comes out at the first key typed
     await expect(page.getByRole("button", { name: "Lock wallet" })).toBeHidden();
     await expect(page.getByRole("heading", { name: "Parallax Wallet", level: 1 })).toBeVisible();
-    await page.keyboard.press("x");
-    const unlock = page.getByLabel("Wallet password");
+    const unlock = await unlockForm(page);
     await unlock.fill(PASSWORD);
     await page.getByRole("button", { name: "Unlock" }).click();
     await expect(page.getByRole("alert")).toHaveText("Wrong password.");
@@ -461,9 +461,10 @@ test.describe("wallet security", () => {
 
       await password.fill(PASSWORD);
       await submit.click();
-      // The danger zone goes with the password, the dialog with it, and the app asks to restart
-      await expect(wipe).toBeHidden();
+      // The dialog stays, saying the app restarts, and the app asks to restart
+      await expect(wipe.getByText("Restarting…").first()).toBeVisible();
       await expect.poll(() => app.evaluate(() => !!(globalThis as { quitAsked?: boolean }).quitAsked)).toBe(true);
+      await expect(wipe).toBeVisible();
 
       const info = await call<{ accounts: unknown[]; hasPassword: boolean }>(page, "WalletInfo");
       expect(info.accounts).toHaveLength(0);

@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import { test, expect, call, PASSWORD } from "../fixtures";
+import { test, expect, call, unlockForm, PASSWORD } from "../fixtures";
 
 // The lock screen: the wallet locked from the toolbar, or found locked as
 // the window opens, and unlocked again with its password.
@@ -21,11 +21,10 @@ test("locking from the toolbar hides the app until the password is typed", async
   await expect(page.getByPlaceholder("Wallet password")).toHaveCount(0);
 
   // The first key brings the form in, and goes in the field
-  await page.keyboard.type(PASSWORD.slice(0, 1));
-  const field = page.getByPlaceholder("Wallet password");
+  const field = await unlockForm(page);
   await expect(page.getByText("Enter your wallet password to unlock it.")).toBeVisible();
-  await expect(field).toHaveValue(PASSWORD.slice(0, 1));
-  await page.keyboard.type(PASSWORD.slice(1));
+  await expect(field).toHaveValue("x");
+  await field.fill(PASSWORD);
   await page.keyboard.press("Enter");
 
   await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
@@ -34,8 +33,8 @@ test("locking from the toolbar hides the app until the password is typed", async
 
 test("a wrong password is refused and the field cleared", async ({ page }) => {
   await lock(page);
-  await page.keyboard.type("not the password");
-  const field = page.getByPlaceholder("Wallet password");
+  const field = await unlockForm(page);
+  await field.fill("not the password");
   const unlock = page.getByRole("button", { name: "Unlock" });
   await unlock.click();
 
