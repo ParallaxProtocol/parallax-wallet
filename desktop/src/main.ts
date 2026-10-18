@@ -557,6 +557,11 @@ function wireIpc() {
   ipcMain.handle("shell:openExternal", (event, url: unknown) => {
     if (trusted(event) && typeof url === "string") openExternal(url);
   });
+  // Windows Security's Core isolation page, for Settings' Security's
+  // Memory integrity row: this one address only, not one the page names
+  ipcMain.on("security:openCoreIsolation", (event) => {
+    if (trusted(event) && isWindows) shell.openExternal("windowsdefender://coreisolation");
+  });
   // Whether this is the packaged app, for Settings' Security: its fuses and
   // sealed app.asar are the packaged binary's (electron-builder.yml)
   ipcMain.handle("security:packaged", (event) => trusted(event) && app.isPackaged);

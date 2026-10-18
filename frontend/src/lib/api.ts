@@ -10,6 +10,7 @@ declare global {
       openExternal: (url: string) => Promise<void>;
       setTheme: (pref: "system" | "light" | "dark") => void;
       security: () => Promise<WindowSecurity>;
+      openCoreIsolation: () => void;
       loginItem: () => Promise<{ supported: boolean; enabled: boolean }>;
       setLoginItem: (on: boolean) => Promise<void>;
       keepAwake: (on: boolean) => void;
@@ -47,6 +48,8 @@ export type SecurityStatus = {
   secretErasing: boolean;
   /** The processor has a hardware random source the kernel mixes in (Linux; elsewhere not known). */
   hardwareRandom: boolean;
+  /** Windows' Memory integrity (Core isolation) as it runs now; "" where there's none or it can't be read. */
+  memoryIntegrity: "on" | "off" | "";
 };
 
 /** Open a URL in the user's default browser. */

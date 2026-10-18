@@ -954,6 +954,12 @@ const de: Dict = {
   "protect.updates": "Kryptografisch geprüfte Updates",
   "protect.updates.desc":
     "Ein Update wird nur installiert, wenn es zu den mit seiner Version veröffentlichten Prüfsummen passt – ein beschädigter oder veränderter Download wird nie installiert.",
+  "protect.memoryIntegrity": "Windows-Speicherintegrität",
+  "protect.memoryIntegrity.desc":
+    "Die Kernisolierung von Windows hält unsignierte Treiber und Schadsoftware aus dem Windows-Kern heraus, von wo aus sich der Arbeitsspeicher jeder App auslesen ließe, auch dieser.",
+  "protect.memoryIntegrity.off":
+    "Auf diesem Computer ist sie aus. In der Windows-Sicherheit unter Gerätesicherheit und Kernisolierung eingeschaltet, schützt sie die obigen Schutzmaßnahmen von unten.",
+  "protect.memoryIntegrity.cta": "Windows-Sicherheit öffnen",
   "protect.tor": "Tor",
   "protect.tor.desc":
     "Alles, was die App sendet, kann über Tor laufen, sodass Ihre IP-Adresse vor dem Netzwerk und den genutzten Diensten verborgen bleibt.",

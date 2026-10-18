@@ -862,6 +862,12 @@ const zhTW: Dict = {
   "protect.logs.desc": "應用程式的日誌經過封存，只有你的錢包能讀取，即使被複製到這台電腦之外也一樣。",
   "protect.updates": "經過加密驗證的更新",
   "protect.updates.desc": "更新只有與其版本一同發布的總和檢查碼相符才會安裝，損壞或遭竄改的下載絕不會被安裝。",
+  "protect.memoryIntegrity": "Windows 記憶體完整性",
+  "protect.memoryIntegrity.desc":
+    "Windows 的核心隔離會將未簽署的驅動程式與惡意軟體擋在 Windows 核心之外——從那裡可以讀取任何應用程式（包括本應用程式）的記憶體。",
+  "protect.memoryIntegrity.off":
+    "這台電腦上它處於關閉狀態。在「Windows 安全性」的「裝置安全性」>「核心隔離」中開啟它，可從底層守護上述各項保護。",
+  "protect.memoryIntegrity.cta": "開啟 Windows 安全性",
   "protect.tor": "Tor",
   "protect.tor.desc": "應用程式傳送的一切都可以經由 Tor，向網路及其使用的服務隱藏你的 IP 位址。",
   "protect.tracking": "不追蹤",

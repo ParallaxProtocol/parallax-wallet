@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { test, expect, goTo, unlockForm, PASSWORD } from "../fixtures";
+import { group, openSettings, sheet } from "./helpers/settings";
 
 // On Windows the backend gives the shell's own processes the access list
 // it gives itself (backend/harden_windows.go HardenShell): another program
@@ -69,4 +70,24 @@ test("the shell's processes are shielded, and the app works under it", async ({ 
   await page.reload();
   await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
   await shielded(await renderer());
+});
+
+test("Security says whether Windows' Memory integrity runs, and opens where it's turned on", async ({ app, page }) => {
+  // Where the button would send the user, caught rather than opened on the runner
+  await app.evaluate(({ shell }) => {
+    const g = globalThis as { opened?: string[] };
+    g.opened = [];
+    shell.openExternal = (async (url: string) => void g.opened!.push(url)) as typeof shell.openExternal;
+  });
+  await openSettings(page, "Security");
+  const protections = group(sheet(page), "How Parallax Wallet protects your wallet");
+  const status = protections.getByLabel(/^Windows memory integrity: (On|Off)$/);
+  await expect(status).toBeVisible();
+  console.log(`Memory integrity: ${await status.textContent()}`);
+  if ((await status.textContent()) === "Off") {
+    await protections.getByRole("button", { name: "Open Windows Security" }).click();
+    await expect
+      .poll(() => app.evaluate(() => (globalThis as { opened?: string[] }).opened))
+      .toEqual(["windowsdefender://coreisolation"]);
+  }
 });

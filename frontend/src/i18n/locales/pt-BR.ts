@@ -932,6 +932,12 @@ const ptBR: Dict = {
   "protect.updates": "Atualizações verificadas criptograficamente",
   "protect.updates.desc":
     "Uma atualização só é instalada se corresponder às somas de verificação publicadas com a versão dela; um download danificado ou alterado nunca é instalado.",
+  "protect.memoryIntegrity": "Integridade de memória do Windows",
+  "protect.memoryIntegrity.desc":
+    "O isolamento de núcleo do Windows mantém drivers não assinados e malware fora do núcleo do Windows, de onde a memória de qualquer app poderia ser lida, inclusive a deste.",
+  "protect.memoryIntegrity.off":
+    "Está desativada neste computador. Ativá-la na Segurança do Windows, em Segurança do dispositivo e Isolamento de núcleo, protege por baixo as proteções acima.",
+  "protect.memoryIntegrity.cta": "Abrir a Segurança do Windows",
   "protect.tor": "Tor",
   "protect.tor.desc":
     "Tudo o que o app envia pode passar pelo Tor, ocultando seu endereço IP da rede e dos serviços que ele usa.",

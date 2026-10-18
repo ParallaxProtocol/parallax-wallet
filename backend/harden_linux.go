@@ -89,3 +89,6 @@ func processDiskBytes() (read, written uint64, ok bool) {
 // HardenShell has nothing to do here: a process can only make itself
 // non-dumpable, not another.
 func HardenShell(pids []int) error { return nil }
+
+// MemoryIntegrity is Windows' (harden_windows.go): nothing to say here.
+func MemoryIntegrity() (on, known bool) { return false, false }

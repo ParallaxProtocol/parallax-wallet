@@ -145,3 +145,13 @@ func hardenedMain() {
 	// Kept up while the test tries it
 	bufio.NewReader(os.Stdin).ReadBytes('\n')
 }
+
+// TestMemoryIntegrity reads Windows' Memory integrity as it runs, which
+// Settings' Security shows: it must be readable, on or off.
+func TestMemoryIntegrity(t *testing.T) {
+	on, known := MemoryIntegrity()
+	if !known {
+		t.Fatal("Memory integrity couldn't be read")
+	}
+	t.Logf("Memory integrity on: %v", on)
+}

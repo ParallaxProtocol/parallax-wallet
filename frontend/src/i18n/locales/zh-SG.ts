@@ -859,6 +859,12 @@ const zhSG: Dict = {
   "protect.logs.desc": "应用的日志经过加封，只有你的钱包能读取，即使被复制到这台电脑之外也一样。",
   "protect.updates": "经过加密校验的更新",
   "protect.updates.desc": "更新只有与其版本一同发布的校验和相符才会安装，损坏或被篡改的下载绝不会被安装。",
+  "protect.memoryIntegrity": "Windows 内存完整性",
+  "protect.memoryIntegrity.desc":
+    "Windows 的内核隔离会将未签名的驱动程序和恶意软件挡在 Windows 内核之外——从那里可以读取任何应用（包括本应用）的内存。",
+  "protect.memoryIntegrity.off":
+    "这台电脑上它处于关闭状态。在“Windows 安全中心”的“设备安全性”>“内核隔离”中开启它，可从底层守护上述各项保护。",
+  "protect.memoryIntegrity.cta": "打开 Windows 安全中心",
   "protect.tor": "Tor",
   "protect.tor.desc": "应用发送的一切都可以经由 Tor，向网络及其使用的服务隐藏你的 IP 地址。",
   "protect.tracking": "不追踪",

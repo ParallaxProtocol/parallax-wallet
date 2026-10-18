@@ -45,6 +45,8 @@ test("Security says how each protection of the wallet stands", async ({ page }) 
   await expect(status(page, SECURITY, "Isolated window", "Partly on")).toBeVisible();
   await expect(protections.getByText(/^This development build isn't sealed/)).toBeVisible();
   await expect(status(page, SECURITY, "Locks itself", "On")).toBeVisible();
+  // Windows' own Memory integrity is Windows' alone
+  await expect(protections.getByText("Windows memory integrity")).toHaveCount(0);
   // What's about privacy is Privacy's
   await expect(protections.getByText("Tor", { exact: true })).toHaveCount(0);
 });

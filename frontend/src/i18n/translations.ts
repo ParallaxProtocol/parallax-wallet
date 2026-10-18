@@ -928,6 +928,12 @@ export const en: Dict = {
   "protect.updates": "Cryptographically verified updates",
   "protect.updates.desc":
     "An update is installed only if it matches the checksums published with its release, so a damaged or altered download never is.",
+  "protect.memoryIntegrity": "Windows memory integrity",
+  "protect.memoryIntegrity.desc":
+    "Windows' Core isolation keeps unsigned drivers and kernel-level malware out of Windows itself, from where any app's memory could be read, this one's included.",
+  "protect.memoryIntegrity.off":
+    "It's off on this computer. Turning it on in Windows Security, under Device security and Core isolation, guards the protections above from below.",
+  "protect.memoryIntegrity.cta": "Open Windows Security",
   "protect.tor": "Tor",
   "protect.tor.desc":
     "Everything the app sends can go through Tor, hiding your IP address from the network and the services it uses.",

@@ -930,6 +930,12 @@ const es: Dict = {
   "protect.updates": "Actualizaciones verificadas criptográficamente",
   "protect.updates.desc":
     "Una actualización solo se instala si coincide con las sumas de verificación publicadas con su versión, así que una descarga dañada o alterada nunca se instala.",
+  "protect.memoryIntegrity": "Integridad de memoria de Windows",
+  "protect.memoryIntegrity.desc":
+    "El aislamiento del núcleo de Windows mantiene los controladores sin firmar y el malware fuera del núcleo de Windows, desde donde podría leerse la memoria de cualquier app, incluida esta.",
+  "protect.memoryIntegrity.off":
+    "Está desactivada en esta computadora. Activarla en Seguridad de Windows, en Seguridad del dispositivo y Aislamiento del núcleo, protege desde abajo las protecciones de arriba.",
+  "protect.memoryIntegrity.cta": "Abrir Seguridad de Windows",
   "protect.tor": "Tor",
   "protect.tor.desc":
     "Todo lo que envía la app puede pasar por Tor, ocultando tu dirección IP de la red y de los servicios que usa.",

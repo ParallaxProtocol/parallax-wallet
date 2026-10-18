@@ -134,6 +134,10 @@ contextBridge.exposeInMainWorld("parallax", {
       packaged: (await ipcRenderer.invoke("security:packaged")) === true,
     };
   },
+  /** Opens Windows Security at Core isolation, where Memory integrity is turned on (Windows). */
+  openCoreIsolation() {
+    ipcRenderer.send("security:openCoreIsolation");
+  },
   /** Whether the app starts at login; `supported` is false in development. */
   loginItem(): Promise<{ supported: boolean; enabled: boolean }> {
     return ipcRenderer.invoke("login:get");

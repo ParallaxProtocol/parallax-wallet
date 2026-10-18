@@ -318,5 +318,22 @@ func ProcessGuarded() ProcessGuard {
 	return g
 }
 
+// codeIntegrityHVCI is SYSTEM_CODEINTEGRITY_INFORMATION's flag for
+// hypervisor-protected code integrity running: Windows Security's Memory
+// integrity, under Core isolation.
+const codeIntegrityHVCI = 0x400 // CODEINTEGRITY_OPTION_HVCI_KMCI_ENABLED
+
+// MemoryIntegrity reports whether Windows' Memory integrity runs now, as
+// the kernel says, not as it's set to start; known is false if it can't
+// be read.
+func MemoryIntegrity() (on, known bool) {
+	info := struct{ Length, Options uint32 }{Length: 8}
+	if err := windows.NtQuerySystemInformation(windows.SystemCodeIntegrityInformation,
+		unsafe.Pointer(&info), uint32(unsafe.Sizeof(info)), nil); err != nil {
+		return false, false
+	}
+	return info.Options&codeIntegrityHVCI != 0, true
+}
+
 // processDiskBytes reads nothing here: the daemon's disk metrics stand.
 func processDiskBytes() (read, written uint64, ok bool) { return 0, 0, false }

@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import {
   AppWindow,
+  Cpu,
   Dices,
   EyeOff,
   HardDrive,
@@ -194,6 +195,27 @@ export default function Protections({ kind }: { kind: "security" | "privacy" }) 
         note={win && win.sandboxed && win.isolated && !win.packaged ? t("protect.isolation.dev") : null}
       />
       <Protection icon={PackageCheck} title={t("protect.updates")} desc={t("protect.updates.desc")} status={always} />
+      {/* Windows' own, below the app's: shown as it runs, with where to turn it on */}
+      {backend?.memoryIntegrity && (
+        <Protection
+          icon={Cpu}
+          title={t("protect.memoryIntegrity")}
+          desc={t("protect.memoryIntegrity.desc")}
+          status={backend.memoryIntegrity === "on" ? on : { label: t("protect.status.off"), tone: "warn" }}
+          note={backend.memoryIntegrity === "off" ? t("protect.memoryIntegrity.off") : null}
+          action={
+            backend.memoryIntegrity === "off" ? (
+              <button
+                type="button"
+                className="btn btn-flat btn-sm"
+                onClick={() => window.parallax?.openCoreIsolation()}
+              >
+                {t("protect.memoryIntegrity.cta")}
+              </button>
+            ) : null
+          }
+        />
+      )}
     </Rows>
   );
 }

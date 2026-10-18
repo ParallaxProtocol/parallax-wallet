@@ -284,6 +284,9 @@ type SecurityStatus struct {
 	// The processor has a hardware random source the kernel mixes into
 	// the generator keys come from (Linux; elsewhere not known)
 	HardwareRandom bool `json:"hardwareRandom"`
+	// Windows' Memory integrity (Core isolation): "on" or "off" as it runs
+	// now, "" where there's none or it can't be read
+	MemoryIntegrity string `json:"memoryIntegrity"`
 }
 
 // HardenShell shields the shell's own processes, its main process and its
@@ -292,11 +295,15 @@ type SecurityStatus struct {
 func (a *App) HardenShell(pids []int) error { return backend.HardenShell(pids) }
 
 func (a *App) SecurityStatus() SecurityStatus {
-	return SecurityStatus{
+	s := SecurityStatus{
 		ProcessGuard:   backend.ProcessGuarded(),
 		SecretErasing:  secretErasing,
 		HardwareRandom: backend.HardwareRandom(),
 	}
+	if on, known := backend.MemoryIntegrity(); known {
+		s.MemoryIntegrity = map[bool]string{true: "on", false: "off"}[on]
+	}
+	return s
 }
 
 // UpdateConfig saves the config the frontend edited, once the node would

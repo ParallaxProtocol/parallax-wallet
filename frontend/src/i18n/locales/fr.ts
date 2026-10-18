@@ -942,6 +942,12 @@ const fr: Dict = {
   "protect.updates": "Mises à jour vérifiées cryptographiquement",
   "protect.updates.desc":
     "Une mise à jour n’est installée que si elle correspond aux sommes de contrôle publiées avec sa version : un téléchargement endommagé ou modifié n’est jamais installé.",
+  "protect.memoryIntegrity": "Intégrité de la mémoire de Windows",
+  "protect.memoryIntegrity.desc":
+    "L’isolation du noyau de Windows tient les pilotes non signés et les logiciels malveillants hors du noyau de Windows, d’où la mémoire de n’importe quelle application pourrait être lue, celle-ci comprise.",
+  "protect.memoryIntegrity.off":
+    "Elle est désactivée sur cet ordinateur. L’activer dans Sécurité Windows, sous Sécurité de l’appareil puis Isolation du noyau, protège par en dessous les protections ci-dessus.",
+  "protect.memoryIntegrity.cta": "Ouvrir Sécurité Windows",
   "protect.tor": "Tor",
   "protect.tor.desc":
     "Tout ce que l’application envoie peut passer par Tor, ce qui masque votre adresse IP au réseau et aux services qu’elle utilise.",
