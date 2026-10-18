@@ -27,7 +27,9 @@ type Given = Record<
   "readMemory" | "writeMemory" | "startThread" | "takeHandles" | "rewriteACL" | "waitQueryEnd",
   boolean
 >;
-const tryProcess = (pid: number): Given => JSON.parse(execFileSync(probe, [String(pid)], { encoding: "utf8" }));
+// What the probe says of itself goes to stderr, kept with the test's output
+const tryProcess = (pid: number): Given =>
+  JSON.parse(execFileSync(probe, [String(pid)], { encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] }));
 
 /** Waits for a process to be shielded, then checks all it gives and keeps. */
 async function shielded(pid: number) {
@@ -45,7 +47,10 @@ async function shielded(pid: number) {
 test("the shell's processes are shielded, and the app works under it", async ({ app, page }) => {
   const renderer = () =>
     app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.getOSProcessId());
-  await shielded(app.process().pid!);
+  // The main process by its own word, as it asks the backend to shield it (not the process Playwright started)
+  const main = await app.evaluate(() => process.pid);
+  console.log(`main process ${main} (Playwright started ${app.process().pid}), window's ${await renderer()}`);
+  await shielded(main);
   await shielded(await renderer());
 
   // The app goes on as before: pages, sealed calls, the lock and unlock

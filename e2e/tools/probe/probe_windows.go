@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"unsafe"
 
 	"golang.org/x/sys/windows"
 )
@@ -25,10 +26,13 @@ func main() {
 		fmt.Fprintln(os.Stderr, "usage: probe <pid>")
 		os.Exit(2)
 	}
-	if err := dropDebugPrivilege(); err != nil {
+	held, err := dropDebugPrivilege()
+	if err != nil {
 		fmt.Fprintln(os.Stderr, "dropping the debug privilege:", err)
 		os.Exit(1)
 	}
+	// What was given, and for what wasn't, why: to stderr, for the test's log
+	fmt.Fprintf(os.Stderr, "probe: process %d, debug privilege held before dropping: %v\n", pid, held)
 	given := map[string]bool{}
 	for name, access := range map[string]uint32{
 		"readMemory":  windows.PROCESS_VM_READ,
@@ -42,24 +46,45 @@ func main() {
 		h, err := windows.OpenProcess(access, false, uint32(pid))
 		if err == nil {
 			windows.CloseHandle(h)
+		} else {
+			fmt.Fprintf(os.Stderr, "probe: %s: %v\n", name, err)
 		}
 		given[name] = err == nil
 	}
 	json.NewEncoder(os.Stdout).Encode(given)
 }
 
-func dropDebugPrivilege() error {
+// dropDebugPrivilege removes SeDebugPrivilege from the token, and says
+// whether it held it, read from the token's own list (as the backend's
+// does, backend/harden_windows.go).
+func dropDebugPrivilege() (held bool, err error) {
 	var token windows.Token
 	if err := windows.OpenProcessToken(windows.CurrentProcess(), windows.TOKEN_ADJUST_PRIVILEGES|windows.TOKEN_QUERY, &token); err != nil {
-		return err
+		return false, err
 	}
 	defer token.Close()
 	var luid windows.LUID
 	if err := windows.LookupPrivilegeValue(nil, windows.StringToUTF16Ptr("SeDebugPrivilege"), &luid); err != nil {
-		return err
+		return false, err
+	}
+	var n uint32
+	_ = windows.GetTokenInformation(token, windows.TokenPrivileges, nil, 0, &n)
+	buf := make([]byte, n)
+	if n == 0 {
+		return false, fmt.Errorf("token privileges: no size")
+	}
+	if err := windows.GetTokenInformation(token, windows.TokenPrivileges, &buf[0], n, &n); err != nil {
+		return false, err
+	}
+	for _, p := range (*windows.Tokenprivileges)(unsafe.Pointer(&buf[0])).AllPrivileges() {
+		if p.Luid == luid {
+			held = true
+		}
+	}
+	if !held {
+		return false, nil
 	}
 	remove := windows.Tokenprivileges{PrivilegeCount: 1}
 	remove.Privileges[0] = windows.LUIDAndAttributes{Luid: luid, Attributes: windows.SE_PRIVILEGE_REMOVED}
-	// A token without it is left as it is (ERROR_NOT_ALL_ASSIGNED, reported as success)
-	return windows.AdjustTokenPrivileges(token, false, &remove, 0, nil, nil)
+	return true, windows.AdjustTokenPrivileges(token, false, &remove, 0, nil, nil)
 }
