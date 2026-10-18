@@ -74,7 +74,7 @@ jobs:
         env:
           GOPRIVATE: github.com/ParallaxProtocol/*
           CGO_ENABLED: "1"
-        run: go test ./backend/ -run '^(TestHardenProcess|TestMemoryIntegrity)$' -count=1 -v
+        run: go test ./backend/ -run '^(TestHardenProcess|TestMemoryIntegrity|TestIPCName)$' -count=1 -v
 
   # The hardened runtime on macOS (backend/harden_darwin_test.go): a copy
   # signed as the app is, tried for its task port as another program would

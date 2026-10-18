@@ -490,7 +490,7 @@ func buildConfigs(g GUIConfig) (node.Config, nodeconfig.Config, error) {
 	// the logs should know it by
 	nodeCfg.Version = parallaxpkg.VersionWithCommit(daemonCommit(), "")
 	nodeCfg.DataDir = g.DataDir
-	nodeCfg.IPCPath = "parallax.ipc"
+	nodeCfg.IPCPath = ipcName(nodeCfg.DataDir)
 	nodeCfg.UserIdent = strings.TrimSpace(g.NodeName)
 
 	if g.MaxPeers > 0 {

@@ -14,3 +14,7 @@ import "syscall"
 func ipcEndpointFits(endpoint string) bool {
 	return len(endpoint)+1 <= len(syscall.RawSockaddrUnix{}.Path)
 }
+
+// ipcName is the node's IPC socket, a file in its data directory: as
+// unique as the directory is.
+func ipcName(dataDir string) string { return "parallax.ipc" }
