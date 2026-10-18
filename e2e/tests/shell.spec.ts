@@ -26,16 +26,39 @@ test("the app's name is set in Geist, its font files the app's own, none fetched
   await expect
     .poll(() => page.evaluate(() => document.fonts.check('500 24px "Geist Variable"', "Parallax Wallet")))
     .toBe(true);
-  // Each one's address, and whether it's under the app's own (app://parallax/assets/...)
-  const fonts = await page.evaluate(() =>
+  // Its files, as the stylesheets name them: every Geist face's source under the app's own
+  // address (app://parallax/assets/...), whichever ones a system has needed so far
+  const sources = await page.evaluate(() => {
+    const urls: string[] = [];
+    for (const sheet of [...document.styleSheets]) {
+      let rules: CSSRuleList;
+      try {
+        rules = sheet.cssRules;
+      } catch {
+        continue;
+      }
+      for (const rule of [...rules]) {
+        if (!(rule instanceof CSSFontFaceRule) || !/Geist/.test(rule.style.getPropertyValue("font-family"))) continue;
+        for (const m of rule.style.getPropertyValue("src").matchAll(/url\(\s*["']?([^"')]+)/g)) {
+          urls.push(new URL(m[1], sheet.href ?? location.href).href);
+        }
+      }
+    }
+    return urls;
+  });
+  const own = await page.evaluate(() => `${location.protocol}//${location.host}/`);
+  expect(sources.length).toBeGreaterThan(0);
+  for (const u of sources) expect(u.startsWith(own), u).toBe(true);
+  // And none fetched from elsewhere: every font the page has loaded is the app's own. On Linux,
+  // where Geist is the text's face too, it's listed here; on macOS and Windows, which set the
+  // text in the system's face, the list may well be empty
+  const loaded = await page.evaluate(() =>
     performance
       .getEntriesByType("resource")
       .map((e) => e.name)
-      .filter((u) => /\.(woff2?|ttf|otf)(\?|$)/.test(u))
-      .map((u) => ({ u, own: u.startsWith(`${location.protocol}//${location.host}/`) })),
+      .filter((u) => /\.(woff2?|ttf|otf)(\?|$)/.test(u)),
   );
-  expect(fonts.length).toBeGreaterThan(0);
-  for (const f of fonts) expect(f, f.u).toMatchObject({ own: true });
+  for (const u of loaded) expect(u.startsWith(own), u).toBe(true);
 });
 
 test("the sidebar's Settings opens Settings", async ({ page }) => {
