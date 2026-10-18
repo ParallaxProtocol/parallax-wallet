@@ -5,20 +5,6 @@
 
 package backend
 
-/*
-#include <mach/mach.h>
-
-// The way in to another process's memory: its task port. Released at once if given.
-static kern_return_t taskFor(int pid) {
-	mach_port_t task = MACH_PORT_NULL;
-	kern_return_t kr = task_for_pid(mach_task_self(), pid, &task);
-	if (kr == KERN_SUCCESS)
-		mach_port_deallocate(mach_task_self(), task);
-	return kr;
-}
-*/
-import "C"
-
 import (
 	"bufio"
 	"encoding/json"
@@ -27,6 +13,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+
+	"github.com/ParallaxProtocol/parallax-gui/backend/internal/taskport"
 )
 
 // signedChild is set in the processes TestHardenedRuntime starts, signed
@@ -49,9 +37,9 @@ func TestHardenedRuntime(t *testing.T) {
 	if !hg.NoMemoryReads {
 		t.Errorf("signed with the hardened runtime, ProcessGuarded = %+v, want NoMemoryReads", hg)
 	}
-	kr := C.taskFor(C.int(hardened))
+	kr := taskport.Try(hardened)
 	t.Logf("task_for_pid of the hardened process, as uid %d: %d", os.Geteuid(), kr)
-	if !root && kr == C.KERN_SUCCESS {
+	if !root && kr == 0 {
 		t.Errorf("another program of the user was given the hardened process's task")
 	}
 
@@ -59,9 +47,9 @@ func TestHardenedRuntime(t *testing.T) {
 	if pg.NoMemoryReads {
 		t.Errorf("signed without the hardened runtime, ProcessGuarded = %+v, want no NoMemoryReads", pg)
 	}
-	kr = C.taskFor(C.int(plain))
+	kr = taskport.Try(plain)
 	t.Logf("task_for_pid of the process without it, as uid %d: %d", os.Geteuid(), kr)
-	if root && kr != C.KERN_SUCCESS {
+	if root && kr != 0 {
 		t.Errorf("root wasn't given an unhardened process's task either: the try shows nothing")
 	}
 }
