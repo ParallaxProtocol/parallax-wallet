@@ -23,11 +23,17 @@ func HardenProcess() error {
 	return nil
 }
 
-// ProcessGuarded reads back what HardenProcess set, as it stands now:
-// reading the memory isn't the process's to refuse here.
+// ProcessGuarded reads back what HardenProcess set, as it stands now, and
+// on macOS whether the code signature keeps other programs out of the
+// process's memory: the hardened runtime, without get-task-allow, as the
+// kernel holds it (codesign_darwin.go). A development build isn't signed
+// so, and says no.
 func ProcessGuarded() ProcessGuard {
 	var lim unix.Rlimit
-	return ProcessGuard{NoCoreDumps: unix.Getrlimit(unix.RLIMIT_CORE, &lim) == nil && lim.Cur == 0}
+	return ProcessGuard{
+		NoCoreDumps:   unix.Getrlimit(unix.RLIMIT_CORE, &lim) == nil && lim.Cur == 0,
+		NoMemoryReads: hardenedRuntime(),
+	}
 }
 
 // processDiskBytes reads nothing here: the daemon's disk metrics stand.

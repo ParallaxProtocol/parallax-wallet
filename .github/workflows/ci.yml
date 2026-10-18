@@ -76,6 +76,30 @@ jobs:
           CGO_ENABLED: "1"
         run: go test ./backend/ -run '^TestHardenProcess$' -count=1 -v
 
+  # The hardened runtime on macOS (backend/harden_darwin_test.go): a copy
+  # signed as the app is, tried for its task port as another program would
+  # read its memory, and one without it as the control; as the runner's
+  # user, and as root, which shows the try is a real one
+  macos-hardening:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.27"
+          check-latest: true
+
+      - name: Test
+        env:
+          GOPRIVATE: github.com/ParallaxProtocol/*
+          CGO_ENABLED: "1"
+        run: |
+          go test ./backend/ -run '^TestHardenedRuntime$' -count=1 -v
+          sudo -E env "PATH=$PATH" go test ./backend/ -run '^TestHardenedRuntime$' -count=1 -v
+
   # The end-to-end tests that are Windows' own (e2e/tests/windows-shell.spec.ts:
   # the shell's processes shielded, and the app working under it) and the
   # app's core flows, on Windows as released: the real app on a runner's
