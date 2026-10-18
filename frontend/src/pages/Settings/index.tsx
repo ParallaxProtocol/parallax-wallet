@@ -158,7 +158,8 @@ export default function Settings() {
   const hidden = (id: SettingsSection) =>
     (offline && (NODE_SECTIONS.has(id) || id === "privacy")) || (id === "security" && !walletInfo?.hasPassword);
   const section = !hidden(chosen) ? chosen : chosen === "security" ? "accounts" : "general";
-  // A wiped wallet has no password, but its dialog stays, saying the app restarts, until it does
+  // A wiped wallet has no password, but its dialog stays, saying the app restarts, until it
+  // does: held from the wipe's start (a wipe that fails leaves the password, and the group shows)
   const [wiped, setWiped] = useState(false);
   const [login, setLogin] = useState<{ supported: boolean; enabled: boolean }>({ supported: false, enabled: false });
   const swap = usePageSwap();
@@ -477,7 +478,7 @@ export default function Settings() {
                 {/* Last, apart from the rest: what can't be undone */}
                 {(walletInfo?.hasPassword || wiped) && (
                   <Group title={t("storage.danger")}>
-                    <WipeWallet onWiped={() => setWiped(true)} />
+                    <WipeWallet onWipe={() => setWiped(true)} />
                   </Group>
                 )}
               </>

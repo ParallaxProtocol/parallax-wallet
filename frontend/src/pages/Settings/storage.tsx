@@ -73,10 +73,10 @@ export function WalletStorage() {
 /**
  * WipeWallet is Settings' Storage's last group, apart from the rest as
  * what can't be undone: wiping the whole wallet. Only a wallet with a
- * password has anything to wipe; once wiped (onWiped), it is kept on
+ * password has anything to wipe; from the wipe's start (onWipe), it is kept on
  * screen by the page around it, its dialog saying the app restarts.
  */
-export function WipeWallet({ onWiped }: { onWiped: () => void }) {
+export function WipeWallet({ onWipe }: { onWipe: () => void }) {
   const t = useT();
   const [wiping, setWiping] = useState(false);
   return (
@@ -98,7 +98,7 @@ export function WipeWallet({ onWiped }: { onWiped: () => void }) {
         </div>
       </Panel>
       <p className="px-1 text-sm text-muted-foreground">{t("storage.danger.note")}</p>
-      <WipeModal open={wiping} onClose={() => setWiping(false)} onWiped={onWiped} />
+      <WipeModal open={wiping} onClose={() => setWiping(false)} onWipe={onWipe} />
     </>
   );
 }
@@ -288,7 +288,7 @@ function ClearChainModal({ open, onClose }: { open: boolean; onClose: () => void
  * wallet password. The app then restarts (app.go), as on a first launch,
  * to set a new password; the dialog stays until it does.
  */
-function WipeModal({ open, onClose, onWiped }: { open: boolean; onClose: () => void; onWiped: () => void }) {
+function WipeModal({ open, onClose, onWipe }: { open: boolean; onClose: () => void; onWipe: () => void }) {
   const t = useT();
   const [restarting, setRestarting] = useState(false);
   return (
@@ -299,20 +299,21 @@ function WipeModal({ open, onClose, onWiped }: { open: boolean; onClose: () => v
       icon={<Trash2 className="size-4" />}
       tone="danger"
     >
-      {open && (
-        <Wipe
-          onClose={onClose}
-          restarting={restarting}
-          onWiped={() => {
-            setRestarting(true);
-            onWiped();
-          }}
-        />
-      )}
+      {open && <Wipe onClose={onClose} restarting={restarting} onStart={onWipe} onWiped={() => setRestarting(true)} />}
     </Modal>
   );
 }
-function Wipe({ onClose, restarting, onWiped }: { onClose: () => void; restarting: boolean; onWiped: () => void }) {
+function Wipe({
+  onClose,
+  restarting,
+  onStart,
+  onWiped,
+}: {
+  onClose: () => void;
+  restarting: boolean;
+  onStart: () => void;
+  onWiped: () => void;
+}) {
   const t = useT();
   const [word, setWord] = useState("");
   const [password, setPassword] = useState("");
@@ -324,6 +325,9 @@ function Wipe({ onClose, restarting, onWiped }: { onClose: () => void; restartin
 
   const wipe = async () => {
     if (held || !typed || !password) return;
+    // Before it, not after: the wallet says it has no password as soon as it's wiped,
+    // which may reach Settings before the answer does, and would take this dialog away
+    onStart();
     const ok = await run(async () => {
       await api.walletWipe(password);
       return true;
