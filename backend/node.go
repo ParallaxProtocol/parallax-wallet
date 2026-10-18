@@ -460,6 +460,8 @@ func (n *NodeController) Status() NodeStatus {
 	}
 	st.Running = true
 	st.RestartPending = nodeSettingsDiffer(startedWith, guiCfg)
+	st.IPCEndpoint = stack.IPCEndpoint()
+	st.IPCTooLong = !startedWith.IPCDisabled && st.IPCEndpoint == ""
 	// The running chain's own ID, rather than the mainnet constant
 	if cfg := parallax.BlockChain().Config(); cfg != nil && cfg.ChainID != nil {
 		st.ChainID = cfg.ChainID.Uint64()

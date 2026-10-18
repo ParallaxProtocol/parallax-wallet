@@ -1793,6 +1793,10 @@ const es: Dict = {
   "settings.ipc": "Endpoint IPC",
   "settings.ipc.desc":
     "Un socket local en el directorio de datos, para la consola parallax-cli y otras herramientas de esta computadora.",
+  "settings.ipc.descWindows":
+    "Una canalización con nombre (named pipe), para la consola parallax-cli y otras herramientas de esta computadora.",
+  "settings.ipc.tooLong":
+    "Desactivado por ahora: la ruta del directorio de datos es demasiado larga para su socket, así que el nodo funciona sin él.",
   "settings.rpc.gasCap": "Tope de gas para llamadas",
   "settings.rpc.gasCap.desc": "El gas máximo que pueden usar eth_call y eth_estimateGas. 0 significa sin tope.",
   "settings.rpc.txFeeCap": "Tope de comisión por transacción",

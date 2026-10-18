@@ -240,6 +240,10 @@ export type NodeStatus = {
   devHeld: boolean;
   /** Why the node's last start failed, until one succeeds. */
   startError?: string;
+  /** The running node's IPC endpoint (a socket, or a named pipe on Windows); absent while it runs without IPC. */
+  ipcEndpoint?: string;
+  /** The node runs without the IPC it started with on: its data directory's path is too long for the socket. */
+  ipcTooLong?: boolean;
   /** The running node waits on a restart for a saved setting it reads only as it starts. */
   restartPending?: boolean;
 };

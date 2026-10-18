@@ -1781,6 +1781,9 @@ export const en: Dict = {
   "settings.ipc": "IPC endpoint",
   "settings.ipc.desc":
     "A local socket in the data directory, for the parallax-cli console and other tools on this computer.",
+  "settings.ipc.descWindows": "A named pipe, for the parallax-cli console and other tools on this computer.",
+  "settings.ipc.tooLong":
+    "Off for now: the data directory's path is too long for its socket, so the node runs without it.",
   "settings.rpc.gasCap": "Gas cap for calls",
   "settings.rpc.gasCap.desc": "The most gas eth_call and eth_estimateGas may use. 0 means no cap.",
   "settings.rpc.txFeeCap": "Transaction fee cap",

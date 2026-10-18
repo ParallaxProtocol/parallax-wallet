@@ -1784,6 +1784,9 @@ const ptBR: Dict = {
   "settings.ipc": "Endpoint IPC",
   "settings.ipc.desc":
     "Um socket local no diretório de dados, para o console parallax-cli e outras ferramentas neste computador.",
+  "settings.ipc.descWindows": "Um pipe nomeado, para o console parallax-cli e outras ferramentas deste computador.",
+  "settings.ipc.tooLong":
+    "Desativado por enquanto: o caminho do diretório de dados é longo demais para o socket, então o nó roda sem ele.",
   "settings.rpc.gasCap": "Limite de gas para chamadas",
   "settings.rpc.gasCap.desc": "O máximo de gas que eth_call e eth_estimateGas podem usar. 0 significa sem limite.",
   "settings.rpc.txFeeCap": "Limite de taxa por transação",

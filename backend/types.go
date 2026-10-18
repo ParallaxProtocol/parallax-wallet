@@ -280,10 +280,17 @@ type NodeStatus struct {
 	DiskUsedBytes uint64 `json:"diskUsedBytes"`
 	MemUsedBytes  uint64 `json:"memUsedBytes"`
 	ClientVersion string `json:"clientVersion"`
-	RPCEndpoint   string `json:"rpcEndpoint"`          // empty if HTTP-RPC disabled
-	DevChain      bool   `json:"devChain"`             // running the private development chain
-	DevHeld       bool   `json:"devHeld"`              // the development chain holds its blocks back (SetDevHold)
-	StartError    string `json:"startError,omitempty"` // why the node's last start failed, until one succeeds
+	RPCEndpoint   string `json:"rpcEndpoint"` // empty if HTTP-RPC disabled
+	// The running node's IPC endpoint, where tools attach: a socket in the
+	// data directory, or on Windows a named pipe (ipc_windows.go ipcName);
+	// empty while it runs without IPC
+	IPCEndpoint string `json:"ipcEndpoint,omitempty"`
+	// IPCTooLong is set while the node runs without the IPC it started
+	// with on, its data directory's path too long for the socket (flags.go)
+	IPCTooLong bool   `json:"ipcTooLong,omitempty"`
+	DevChain   bool   `json:"devChain"`             // running the private development chain
+	DevHeld    bool   `json:"devHeld"`              // the development chain holds its blocks back (SetDevHold)
+	StartError string `json:"startError,omitempty"` // why the node's last start failed, until one succeeds
 	// RestartPending is set while the running node waits on a restart for
 	// a saved setting it reads only as it starts (nodeSettingsDiffer)
 	RestartPending bool `json:"restartPending,omitempty"`

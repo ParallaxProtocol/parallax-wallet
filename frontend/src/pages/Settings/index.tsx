@@ -137,7 +137,8 @@ export default function Settings() {
   }, []);
   // A stopped node reads the saved settings when it next starts: nothing
   // waits on its restart then
-  const nodeRunning = !!useNode()?.running;
+  const liveNode = useNode();
+  const nodeRunning = !!liveNode?.running;
   // Whether this build ships a Tor of its own, for the Tor settings
   const tor = useTorStatus();
   const torBundled = tor?.bundled ?? true;
@@ -1523,7 +1524,28 @@ export default function Settings() {
                         label={t("settings.graphql")}
                       />
                     </Setting>
-                    <Setting title={t("settings.ipc")} desc={t("settings.ipc.desc")} restart={restart("ipcDisabled")}>
+                    <Setting
+                      title={t("settings.ipc")}
+                      desc={
+                        <>
+                          {/* A socket in the data directory; on Windows a named pipe, the computer's */}
+                          {t(window.parallax?.platform === "win32" ? "settings.ipc.descWindows" : "settings.ipc.desc")}
+                          {/* Where tools attach, while the node runs: on Windows its own name, the default data directory's aside */}
+                          {liveNode?.running && liveNode.ipcEndpoint && (
+                            <span className="mt-1 flex items-center gap-1">
+                              <span className="selectable font-mono text-xs break-all text-foreground/80">
+                                {liveNode.ipcEndpoint}
+                              </span>
+                              <CopyButton value={liveNode.ipcEndpoint} />
+                            </span>
+                          )}
+                          {liveNode?.running && liveNode.ipcTooLong && (
+                            <span className="mt-1 block text-warn-ink">{t("settings.ipc.tooLong")}</span>
+                          )}
+                        </>
+                      }
+                      restart={restart("ipcDisabled")}
+                    >
                       <Toggle
                         checked={!cfg.ipcDisabled}
                         onChange={(v) => update({ ipcDisabled: !v })}

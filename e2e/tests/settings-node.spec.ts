@@ -1,3 +1,4 @@
+import path from "node:path";
 import { test, expect, call, nodeRunning } from "../fixtures";
 import { advanced, config, group, openSettings, row, saveBar, savedAs, sheet } from "./helpers/settings";
 
@@ -144,4 +145,44 @@ test("the log level applies at once and is saved", async ({ page }) => {
   await sheet(page).getByRole("switch", { name: "Clear logs on startup" }).click();
   await savedAs(page, "clearLogsOnStartup", true);
   await expect(saveBar.unsaved(page)).toBeHidden();
+});
+
+test("the IPC row says where tools attach to the running node, or why it runs without", async ({ page }) => {
+  await nodeRunning(page);
+  await openSettings(page, "RPC");
+  const ipc = row(sheet(page), "IPC endpoint");
+  const status = await call<{ ipcEndpoint?: string; ipcTooLong?: boolean }>(page, "NodeStatus");
+  if (process.platform === "win32") {
+    // A named pipe of its own, this data directory's
+    await expect(ipc).toContainText("A named pipe, for the parallax-cli console");
+    expect(status.ipcEndpoint).toMatch(/^\\\\\.\\pipe\\parallax-[0-9a-f]+\.ipc$/);
+  } else {
+    await expect(ipc).toContainText("A local socket in the data directory");
+  }
+  if (status.ipcEndpoint) {
+    await expect(ipc.getByText(status.ipcEndpoint, { exact: true })).toBeVisible();
+    await expect(ipc.getByRole("button", { name: "Copy" })).toBeVisible();
+  } else {
+    // macOS's test homes are deep: their socket's path doesn't fit, as the next test makes sure of
+    expect(status.ipcTooLong).toBe(true);
+    await expect(ipc.getByText(/^Off for now: the data directory's path is too long/)).toBeVisible();
+  }
+});
+
+test.describe("a data directory too deep for the IPC socket", () => {
+  test.skip(process.platform === "win32", "Windows' IPC is a named pipe, not a path");
+  // In the test's own home, deep enough that no socket's path fits (103 characters on macOS, 107 on Linux)
+  test.use({
+    config: async ({ home }, use) => use({ dataDir: path.join(home, ...Array(6).fill("deep-folder-name"), "data") }),
+  });
+
+  test("the node runs without IPC, and the row says why", async ({ page }) => {
+    await nodeRunning(page);
+    const status = await call<{ ipcEndpoint?: string; ipcTooLong?: boolean }>(page, "NodeStatus");
+    expect(status).toMatchObject({ ipcTooLong: true });
+    expect(status.ipcEndpoint ?? "").toBe("");
+    await openSettings(page, "RPC");
+    const ipc = row(sheet(page), "IPC endpoint");
+    await expect(ipc.getByText(/^Off for now: the data directory's path is too long/)).toBeVisible();
+  });
 });

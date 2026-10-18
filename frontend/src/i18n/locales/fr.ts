@@ -1798,6 +1798,10 @@ const fr: Dict = {
   "settings.ipc": "Point de terminaison IPC",
   "settings.ipc.desc":
     "Un socket local dans le répertoire de données, pour la console parallax-cli et les autres outils de cet ordinateur.",
+  "settings.ipc.descWindows":
+    "Un canal nommé (named pipe), pour la console parallax-cli et les autres outils de cet ordinateur.",
+  "settings.ipc.tooLong":
+    "Désactivé pour l’instant : le chemin du dossier de données est trop long pour son socket, le nœud tourne donc sans lui.",
   "settings.rpc.gasCap": "Plafond de gaz des appels",
   "settings.rpc.gasCap.desc":
     "La quantité maximale de gaz que eth_call et eth_estimateGas peuvent utiliser. 0 signifie aucun plafond.",

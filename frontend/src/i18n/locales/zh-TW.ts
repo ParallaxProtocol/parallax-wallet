@@ -1666,6 +1666,8 @@ const zhTW: Dict = {
   "settings.graphql.desc": "在 HTTP-RPC 伺服器的 /graphql 提供 GraphQL 端點。",
   "settings.ipc": "IPC 端點",
   "settings.ipc.desc": "資料目錄中的本機通訊端，供 parallax-cli 主控台及這台電腦上的其他工具使用。",
+  "settings.ipc.descWindows": "一個具名管道，供 parallax-cli 主控台與這台電腦上的其他工具使用。",
+  "settings.ipc.tooLong": "暫時關閉：資料目錄的路徑對其通訊端來說太長，因此節點在沒有它的情況下執行。",
   "settings.rpc.gasCap": "呼叫的 Gas 上限",
   "settings.rpc.gasCap.desc": "eth_call 與 eth_estimateGas 最多可使用的 Gas。0 表示不設上限。",
   "settings.rpc.txFeeCap": "交易手續費上限",

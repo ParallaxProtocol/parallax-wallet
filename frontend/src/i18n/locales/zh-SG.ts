@@ -1661,6 +1661,8 @@ const zhSG: Dict = {
   "settings.graphql.desc": "在 HTTP-RPC 服务器的 /graphql 路径提供 GraphQL 端点。",
   "settings.ipc": "IPC 端点",
   "settings.ipc.desc": "数据目录中的本地套接字，供 parallax-cli 控制台及本机其他工具使用。",
+  "settings.ipc.descWindows": "一个命名管道，供 parallax-cli 控制台和这台电脑上的其他工具使用。",
+  "settings.ipc.tooLong": "暂时关闭：数据目录的路径对其套接字来说太长，因此节点在没有它的情况下运行。",
   "settings.rpc.gasCap": "调用 Gas 上限",
   "settings.rpc.gasCap.desc": "eth_call 和 eth_estimateGas 可使用的最大 Gas 量。0 表示不设上限。",
   "settings.rpc.txFeeCap": "交易手续费上限",

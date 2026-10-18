@@ -1822,6 +1822,9 @@ const de: Dict = {
   "settings.ipc": "IPC-Endpunkt",
   "settings.ipc.desc":
     "Ein lokaler Socket im Datenverzeichnis für die parallax-cli-Konsole und andere Tools auf diesem Computer.",
+  "settings.ipc.descWindows": "Eine Named Pipe für die parallax-cli-Konsole und andere Werkzeuge auf diesem Computer.",
+  "settings.ipc.tooLong":
+    "Vorerst aus: Der Pfad des Datenverzeichnisses ist zu lang für seinen Socket, daher läuft der Node ohne ihn.",
   "settings.rpc.gasCap": "Gas-Limit für Aufrufe",
   "settings.rpc.gasCap.desc":
     "Das maximale Gas, das eth_call und eth_estimateGas verbrauchen dürfen. 0 bedeutet kein Limit.",
