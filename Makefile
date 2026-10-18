@@ -99,7 +99,9 @@ dev:
 
 # e2e runs the end-to-end tests (e2e/): the real app, built as it is
 # here, each test in a home of its own on the development chain. Pass
-# Playwright's arguments in E2E_ARGS (make e2e E2E_ARGS="tests/send.spec.ts").
+# Playwright's arguments in E2E_ARGS (make e2e E2E_ARGS="tests/send.spec.ts"),
+# which runs only what they pick: not every test the clipboard's wait on
+# first (e2e/playwright.config.ts), as the whole suite does.
 # Where xvfb-run is installed they run on a virtual display, as in CI: the
 # test windows stay off the desktop, and none goes unpainted under the
 # others (a Wayland compositor stops painting a covered window, and a test
@@ -110,7 +112,7 @@ E2E_DISPLAY := $(if $(and $(XVFB_RUN),$(if $(E2E_HEADED),,1)),env -u WAYLAND_DIS
 e2e: backend frontend desktop-deps
 	# Electron fetches its binary on first use: here, once, not by each test worker at once
 	cd desktop && npm run build && node -e "require('electron')"
-	cd e2e && npm ci && $(E2E_DISPLAY) npx playwright test $(E2E_ARGS)
+	cd e2e && npm ci && $(E2E_DISPLAY) npx playwright test $(if $(E2E_ARGS),--no-deps $(E2E_ARGS),)
 
 clean:
 	rm -rf build/backend build/package build/tor frontend/dist desktop/dist e2e/test-results e2e/playwright-report

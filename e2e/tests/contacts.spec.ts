@@ -188,8 +188,8 @@ test.describe("contacts", () => {
       expect.objectContaining({ name: ALICE.name, address: ALICE.address, note: ALICE.note, favorite: true }),
       expect.objectContaining({ name: BOB.name, address: BOB.address, favorite: false }),
     ]);
-    // Private to the user, as a backup is
-    expect(fs.statSync(json).mode & 0o777).toBe(0o600);
+    // Private to the user, as a backup is: where the file's mode says so (not on Windows, which has none)
+    if (process.platform !== "win32") expect(fs.statSync(json).mode & 0o777).toBe(0o600);
 
     const csv = path.join(home, "contacts.csv");
     await answerDialogs(app, csv);
@@ -197,7 +197,7 @@ test.describe("contacts", () => {
     await page.getByRole("button", { name: "Export" }).click();
     await page.getByRole("menuitem", { name: "Export as CSV…" }).click();
     await expect(page.getByText("Exported 2 contacts.")).toBeVisible();
-    expect(fs.readFileSync(csv, "utf8").trim().split("\n")).toEqual([
+    expect(fs.readFileSync(csv, "utf8").trim().split(/\r?\n/)).toEqual([
       "name,address,note,favorite",
       `${ALICE.name},${ALICE.address},"${ALICE.note}",yes`,
       `${BOB.name},${BOB.address},,`,
