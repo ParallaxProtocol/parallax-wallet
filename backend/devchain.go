@@ -35,10 +35,17 @@ const devGasLimit = 11_500_000
 // devFunds is what the genesis gives the funded address: a million LAX.
 var devFunds = new(big.Int).Mul(big.NewInt(1_000_000), big.NewInt(1e18))
 
-// DevBuild reports whether the app runs from `make dev`, which sets
+// DevBuild reports whether the app runs as a development build: a backend
+// built for it (devFeatures), run from `make dev` or the tests, which set
 // PARALLAX_DEV in the environment. Release builds never offer the
-// development chain, whatever their config holds.
-func DevBuild() bool { return os.Getenv("PARALLAX_DEV") == "1" }
+// development chain, whatever their config or environment holds.
+func DevBuild() bool { return devFeatures == "on" && os.Getenv("PARALLAX_DEV") == "1" }
+
+// devFeatures is "on" in a backend built for development or the tests
+// (make dev, make e2e: -X ...backend.devFeatures=on), and nothing in a
+// release: there PARALLAX_DEV, which anyone starting the app can set,
+// unlocks nothing (the development chain, profiles, DevGoroutines).
+var devFeatures = ""
 
 // profileName is a valid profile name: lower-case letters, digits and
 // dashes, starting with a letter or digit, at most 32 long.

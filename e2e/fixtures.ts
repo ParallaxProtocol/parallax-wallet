@@ -191,14 +191,33 @@ export const test = base.extend<Fixtures & Options>({
       const win = app.windows()[0];
       const shot = await win?.screenshot({ timeout: 5_000 }).catch(() => null);
       if (shot) await testInfo.attach("screenshot", { body: shot, contentType: "image/png" });
-      // Where each of the backend's goroutines stands, for a failure that's a hang (development builds answer it)
-      const stacks = win
-        ? await Promise.race([
-            call<string>(win, "DevGoroutines").catch((e: Error) => `unavailable: ${e.message}`),
-            new Promise<string>((r) => setTimeout(() => r("unavailable: no answer in 5s"), 5_000)),
-          ])
-        : "unavailable: no window";
+      // Where each of the backend's goroutines stands, for a failure that's a hang (development builds answer
+      // it): asked by the main process, which reaches the backend even when the window doesn't answer
+      const within = <T>(p: Promise<T>, what: string) =>
+        Promise.race([
+          p,
+          new Promise<T>((_, no) => setTimeout(() => no(new Error(`${what}: no answer in 5s`)), 5_000)),
+        ]);
+      const stacks = await within(
+        app.evaluate(async () => {
+          const backend = (
+            globalThis as {
+              parallaxBackend?: { call(m: string, a: unknown[]): Promise<{ result?: unknown; error?: string }> };
+            }
+          ).parallaxBackend;
+          if (!backend) return "unavailable: the main process has no backend for tests";
+          const res = await backend.call("DevGoroutines", []);
+          return res.error ? `unavailable: ${res.error}` : String(res.result);
+        }),
+        "the main process",
+      ).catch((e: Error) => `unavailable: ${e.message}`);
       await testInfo.attach("backend goroutines", { body: stacks, contentType: "text/plain" });
+      // Electron's own processes as they stand: each one's kind, ID, CPU and memory (a renderer gone, or busy)
+      const processes = await within(
+        app.evaluate(({ app }) => JSON.stringify(app.getAppMetrics(), null, 2)),
+        "the main process",
+      ).catch((e: Error) => `unavailable: ${e.message}`);
+      await testInfo.attach("electron processes", { body: processes, contentType: "application/json" });
       const trace = testInfo.outputPath("trace.zip");
       if (
         await app

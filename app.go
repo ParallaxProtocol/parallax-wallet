@@ -10,8 +10,10 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ParallaxProtocol/parallax-gui/backend"
@@ -873,14 +875,39 @@ func (a *App) WalletReplace(req backend.ReplaceRequest) (backend.SentTx, error) 
 func (a *App) DevSetHold(hold bool) error { return a.node.SetDevHold(hold) }
 
 // DevGoroutines is every goroutine's stack, for the end-to-end tests to
-// keep with a failure that may be a hang (make dev only: a release build
-// refuses it).
+// keep with a failure that may be a hang: a build made for the development
+// features only (backend.DevBuild), a release's refusing it. Each says its
+// state and where it is, its functions and their lines, and no value:
+// what the functions were called with is left out, an address or any word
+// of what they hold (stacksWithoutValues).
 func (a *App) DevGoroutines() (string, error) {
 	if !backend.DevBuild() {
 		return "", errors.New("development builds only")
 	}
 	buf := make([]byte, 1<<20)
-	return string(buf[:runtime.Stack(buf, true)]), nil
+	return stacksWithoutValues(string(buf[:runtime.Stack(buf, true)])), nil
+}
+
+var (
+	// A call's arguments, at the end of its line: "pkg.(*T).f(0x1, {0x2, ...})"
+	stackArgs = regexp.MustCompile(`\([^()]*\)$`)
+	// Where in a function's code, after its file and line: "\tfile.go:12 +0x5b"
+	stackOffset = regexp.MustCompile(` \+0x[0-9a-f]+$`)
+)
+
+// stacksWithoutValues takes runtime.Stack's goroutines and leaves out every
+// value they print: the arguments of each call and where in its code it is.
+func stacksWithoutValues(stacks string) string {
+	lines := strings.Split(stacks, "\n")
+	for i, l := range lines {
+		switch {
+		case strings.HasPrefix(l, "\t"):
+			lines[i] = stackOffset.ReplaceAllString(l, "")
+		case l != "" && !strings.HasPrefix(l, "goroutine ") && !strings.HasPrefix(l, "created by "):
+			lines[i] = stackArgs.ReplaceAllString(l, "(...)")
+		}
+	}
+	return strings.Join(lines, "\n")
 }
 
 // ---------------------------------------------------------------------------

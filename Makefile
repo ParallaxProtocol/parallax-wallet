@@ -55,11 +55,17 @@ export MACOSX_DEPLOYMENT_TARGET ?= 12.0
 # covers it all the same.
 BACKEND_SIGN := $(if $(filter darwin,$(GOOS)),codesign --force --sign - --options runtime $(BACKEND_DIR)/$(BACKEND_EXE),)
 
+# The development features (the development chain, profiles, the tests'
+# diagnostics) are built into the backend only for development and the
+# tests: make e2e's backend has them, a release's never does, so there
+# PARALLAX_DEV unlocks nothing (backend/devchain.go DevBuild).
+BACKEND_DEV_FEATURES :=
+
 # backend builds the Go engine (the node and updater behind the bridge).
 backend:
 	@mkdir -p $(BACKEND_DIR)
 	CGO_ENABLED=$(CGO) GOOS=$(GOOS) GOARCH=$(GOARCH) GOEXPERIMENT=$(GOEXPERIMENT_FLAGS) go build -trimpath $(BACKEND_TAGS) \
-	  -ldflags "$(LDFLAGS) $(BACKEND_LINK) -X github.com/ParallaxProtocol/parallax-gui/backend.GUIVersion=$(VERSION) -X github.com/ParallaxProtocol/parallax-gui/backend.DaemonCommit=$(DAEMON_COMMIT)" \
+	  -ldflags "$(LDFLAGS) $(BACKEND_LINK) -X github.com/ParallaxProtocol/parallax-gui/backend.GUIVersion=$(VERSION) -X github.com/ParallaxProtocol/parallax-gui/backend.DaemonCommit=$(DAEMON_COMMIT) $(BACKEND_DEV_FEATURES)" \
 	  -o $(BACKEND_DIR)/$(BACKEND_EXE) .
 	$(BACKEND_SIGN)
 
@@ -109,6 +115,7 @@ dev:
 XVFB_RUN := $(shell command -v xvfb-run 2>/dev/null)
 E2E_DISPLAY := $(if $(and $(XVFB_RUN),$(if $(E2E_HEADED),,1)),env -u WAYLAND_DISPLAY XDG_SESSION_TYPE=x11 xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24",)
 
+e2e: BACKEND_DEV_FEATURES := -X github.com/ParallaxProtocol/parallax-gui/backend.devFeatures=on
 e2e: backend frontend desktop-deps
 	# Electron fetches its binary on first use: here, once, not by each test worker at once
 	cd desktop && npm run build && node -e "require('electron')"

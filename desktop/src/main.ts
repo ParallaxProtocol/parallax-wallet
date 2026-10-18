@@ -104,6 +104,10 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 const backend = new Backend();
+// The end-to-end tests reach the backend through this when the window can't
+// answer, to keep where it stood with a failure (e2e/fixtures.ts). Packaged
+// apps have none
+if (!app.isPackaged && TEST_USER_DATA) (globalThis as { parallaxBackend?: Backend }).parallaxBackend = backend;
 let mainWindow: BrowserWindow | null = null;
 let quitting = false;
 /** Runs once the backend has stopped, just before the process exits (restart after an update). */
