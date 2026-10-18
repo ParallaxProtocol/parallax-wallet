@@ -8,7 +8,6 @@ package backend
 import (
 	"bufio"
 	"encoding/json"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -60,7 +59,13 @@ func TestHardenedRuntime(t *testing.T) {
 func startSigned(t *testing.T, name string, options ...string) (int, ProcessGuard) {
 	t.Helper()
 	bin := filepath.Join(t.TempDir(), name)
-	copyFile(t, os.Args[0], bin)
+	// The updater's copy (updater.go), made runnable
+	if err := copyFile(os.Args[0], bin); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(bin, 0o755); err != nil {
+		t.Fatal(err)
+	}
 	sign := append([]string{"--force", "--sign", "-"}, options...)
 	if out, err := exec.Command("codesign", append(sign, bin)...).CombinedOutput(); err != nil {
 		t.Fatalf("codesign %s: %v\n%s", name, err, out)
@@ -92,23 +97,6 @@ func startSigned(t *testing.T, name string, options ...string) (int, ProcessGuar
 		t.Fatalf("%s said %q: %v", name, line, err)
 	}
 	return cmd.Process.Pid, report.Guard
-}
-
-func copyFile(t *testing.T, from, to string) {
-	t.Helper()
-	in, err := os.Open(from)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer in.Close()
-	out, err := os.OpenFile(to, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o755)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer out.Close()
-	if _, err := io.Copy(out, in); err != nil {
-		t.Fatal(err)
-	}
 }
 
 // signedChildMain hardens itself as the backend does, says how it stands,
