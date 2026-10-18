@@ -47,12 +47,21 @@ endif
 # one that built them
 export MACOSX_DEPLOYMENT_TARGET ?= 12.0
 
+# On macOS the backend is signed here, ad hoc, with the hardened runtime
+# and no entitlements: electron-builder would give it Electron's helpers'
+# (allow-jit, disable-library-validation), which V8 needs and the Go
+# backend doesn't, so it leaves the backend as signed here
+# (desktop/electron-builder.yml signIgnore). The app's own signature
+# covers it all the same.
+BACKEND_SIGN := $(if $(filter darwin,$(GOOS)),codesign --force --sign - --options runtime $(BACKEND_DIR)/$(BACKEND_EXE),)
+
 # backend builds the Go engine (the node and updater behind the bridge).
 backend:
 	@mkdir -p $(BACKEND_DIR)
 	CGO_ENABLED=$(CGO) GOOS=$(GOOS) GOARCH=$(GOARCH) GOEXPERIMENT=$(GOEXPERIMENT_FLAGS) go build -trimpath $(BACKEND_TAGS) \
 	  -ldflags "$(LDFLAGS) $(BACKEND_LINK) -X github.com/ParallaxProtocol/parallax-gui/backend.GUIVersion=$(VERSION) -X github.com/ParallaxProtocol/parallax-gui/backend.DaemonCommit=$(DAEMON_COMMIT)" \
 	  -o $(BACKEND_DIR)/$(BACKEND_EXE) .
+	$(BACKEND_SIGN)
 
 # tor puts the Tor the app ships beside the backend (backend/tor.go,
 # desktop/scripts/fetch-tor.mjs): the Tor Project's build for the platform,

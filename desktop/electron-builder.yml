@@ -66,6 +66,11 @@ mac:
   hardenedRuntime: true
   entitlements: resources/entitlements.mac.plist
   entitlementsInherit: resources/entitlements.mac.inherit.plist
+  # The backend comes signed already, with the hardened runtime and none of
+  # these entitlements, which only V8 needs (the Makefile's BACKEND_SIGN):
+  # left as it is, and sealed in with the rest by the app's signature
+  signIgnore:
+    - "/Contents/Resources/backend/parallax-backend$"
   # The offline signer scans signing QR codes with the camera
   extendInfo:
     NSCameraUsageDescription: Parallax Wallet uses the camera to scan offline signing QR codes.

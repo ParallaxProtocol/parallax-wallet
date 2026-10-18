@@ -2,8 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
   The hardened runtime's exceptions for everything else in the bundle:
-  Electron's helpers (renderer, GPU, utility), which run V8 too, and the
-  Go backend. The same two as the app's, without the camera.
+  Electron's helpers (renderer, GPU, utility), which run V8 too. The same
+  two as the app's, without the camera. Not the Go backend, which needs
+  neither: it's signed with none (the Makefile's BACKEND_SIGN).
 -->
 <plist version="1.0">
   <dict>

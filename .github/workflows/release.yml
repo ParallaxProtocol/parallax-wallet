@@ -88,6 +88,20 @@ jobs:
             GOOS="${{ matrix.os }}" GOARCH="${{ matrix.arch }}" \
             VERSION="${{ steps.version.outputs.version }}"
 
+      # The backend as the app carries it: the hardened runtime, and no
+      # entitlements (the Makefile signs it so, electron-builder leaves it)
+      - name: Check the backend's signature
+        if: matrix.os == 'darwin'
+        shell: bash
+        run: |
+          bin="$(find build/package -path '*.app/Contents/Resources/backend/parallax-backend' | head -n1)"
+          [ -n "$bin" ] || { echo "no backend in the app bundle"; exit 1; }
+          codesign --verify --strict "$bin"
+          codesign -dv "$bin" 2>&1 | grep -E '^CodeDirectory.*flags=.*runtime' || { echo "not signed with the hardened runtime"; exit 1; }
+          ents="$(codesign -d --entitlements - --xml "$bin" 2>/dev/null)"
+          if echo "$ents" | grep -q '<key>'; then echo "the backend carries entitlements:"; echo "$ents"; exit 1; fi
+          echo "the backend: hardened runtime, no entitlements"
+
       - name: Upload GUI artifact
         uses: actions/upload-artifact@v4
         with:
