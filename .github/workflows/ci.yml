@@ -196,9 +196,9 @@ jobs:
         working-directory: desktop
         run: npm ci && npm run typecheck && npm run build
 
-  # The end-to-end tests (e2e/): the real app, each test on its own
-  # development chain, under a virtual display
-  e2e:
+  # The whole end-to-end suite (e2e/) on Linux: the real app, each test on
+  # its own development chain, under a virtual display
+  linux-e2e:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -240,7 +240,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-report
+          name: linux-e2e-report
           path: |
             e2e/playwright-report/
             e2e/test-results/
