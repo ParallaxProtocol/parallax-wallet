@@ -167,3 +167,19 @@ test("with Tor off, no Tor bar shows", async ({ page }) => {
   await expect(page.getByText(/Connect(ed|ing) (through|to) Tor/)).toHaveCount(0);
   await expect(page.getByText("Tor isn't connected: nothing goes out")).toHaveCount(0);
 });
+
+test.describe("a node that couldn't start", () => {
+  // The development chain funding what isn't an address: the app's start of the node fails
+  test.use({ config: { devFundAddress: "nonsense" } });
+
+  test("the node bar says why, and the node's page in full", async ({ page }) => {
+    const bar = page.getByRole("region", { name: "Network" });
+    await expect(bar.getByText("Offline")).toBeVisible();
+    const reason = 'development chain: "nonsense" is not an address';
+    await expect(bar.getByText(`Couldn't start: ${reason}`)).toBeVisible();
+    await expect(bar.getByText("Connect to see your balance and send LAX.")).toHaveCount(0);
+
+    await bar.getByRole("button", { name: "Show the node" }).click();
+    await expect(bar.getByText(`The node couldn't start the last time it tried: ${reason}`)).toBeVisible();
+  });
+});

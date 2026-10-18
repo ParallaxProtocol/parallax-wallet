@@ -279,6 +279,8 @@ const de: Dict = {
   "node.waitTor": "Warten auf Tor… {n} %",
   "node.waitTorFailed": "Warten auf Tor",
   "node.offlineHint": "Verbinden Sie sich, um Ihr Guthaben zu sehen und LAX zu senden.",
+  "node.startFailed": "Start fehlgeschlagen: {reason}",
+  "node.startFailedNote": "Der Node konnte beim letzten Versuch nicht starten: {reason}",
   "overview.stopped.title": "Sie sind nicht verbunden",
   "overview.stopped.desc":
     "Verbinden Sie sich, um mit dem Parallax-Netzwerk zu synchronisieren, jeden Block selbst zu prüfen und Ihre Wallet ohne Dritte zu betreiben.",

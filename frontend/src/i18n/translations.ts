@@ -292,6 +292,8 @@ export const en: Dict = {
   "node.waitTor": "Waiting for Tor… {n}%",
   "node.waitTorFailed": "Waiting for Tor",
   "node.offlineHint": "Connect to see your balance and send LAX.",
+  "node.startFailed": "Couldn't start: {reason}",
+  "node.startFailedNote": "The node couldn't start the last time it tried: {reason}",
   "overview.stopped.title": "You're not connected",
   "overview.stopped.desc":
     "Connect to sync with the Parallax network, verify every block yourself and serve your wallet without any third party.",

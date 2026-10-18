@@ -266,6 +266,8 @@ const zhSG: Dict = {
   "node.waitTor": "正在等待 Tor… {n}%",
   "node.waitTorFailed": "正在等待 Tor",
   "node.offlineHint": "连接后即可查看余额并发送 LAX。",
+  "node.startFailed": "无法启动：{reason}",
+  "node.startFailedNote": "节点上次尝试启动时失败：{reason}",
   "overview.stopped.title": "尚未连接",
   "overview.stopped.desc": "连接后即可与 Parallax 网络同步，亲自验证每个区块，无需依赖任何第三方即可为钱包提供数据。",
   "overview.sync.searching": "正在寻找对等节点",

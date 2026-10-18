@@ -266,6 +266,8 @@ const zhTW: Dict = {
   "node.waitTor": "正在等待 Tor… {n}%",
   "node.waitTorFailed": "正在等待 Tor",
   "node.offlineHint": "連線後即可查看餘額並傳送 LAX。",
+  "node.startFailed": "無法啟動：{reason}",
+  "node.startFailedNote": "節點上次嘗試啟動時失敗：{reason}",
   "overview.stopped.title": "尚未連線",
   "overview.stopped.desc": "連線後即可與 Parallax 網路同步、親自驗證每個區塊，讓錢包完全不必依賴第三方。",
   "overview.sync.searching": "正在尋找對等節點",

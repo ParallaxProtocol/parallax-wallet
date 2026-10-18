@@ -271,6 +271,8 @@ const fr: Dict = {
   "node.waitTor": "En attente de Tor… {n} %",
   "node.waitTorFailed": "En attente de Tor",
   "node.offlineHint": "Connectez-vous pour voir votre solde et envoyer des LAX.",
+  "node.startFailed": "Démarrage impossible : {reason}",
+  "node.startFailedNote": "Le nœud n’a pas pu démarrer lors de sa dernière tentative : {reason}",
   "overview.stopped.title": "Vous n’êtes pas connecté",
   "overview.stopped.desc":
     "Connectez-vous pour vous synchroniser avec le réseau Parallax, vérifier vous-même chaque bloc et alimenter votre portefeuille sans aucun intermédiaire.",

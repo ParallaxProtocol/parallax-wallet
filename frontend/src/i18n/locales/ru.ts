@@ -275,6 +275,8 @@ const ru: Dict = {
   "node.waitTor": "Ожидание Tor… {n}%",
   "node.waitTorFailed": "Ожидание Tor",
   "node.offlineHint": "Подключитесь, чтобы видеть баланс и отправлять LAX.",
+  "node.startFailed": "Не удалось запустить: {reason}",
+  "node.startFailedNote": "Узел не удалось запустить при последней попытке: {reason}",
   "overview.stopped.title": "Вы не подключены",
   "overview.stopped.desc":
     "Подключитесь, чтобы синхронизироваться с сетью Parallax, самостоятельно проверять каждый блок и обслуживать свой кошелёк без посредников.",

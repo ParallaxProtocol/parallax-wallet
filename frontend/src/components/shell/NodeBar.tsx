@@ -194,6 +194,11 @@ export default function NodeBar() {
                       {t("status.uptime", { time: formatDuration(node.uptimeSeconds) })}
                     </span>
                   </>
+                ) : node?.startError && !open ? (
+                  // Its last start failed (an auto-start's has no one else to tell): why, whole in the tooltip
+                  <Tooltip content={node.startError}>
+                    <span className="text-warn-ink">{t("node.startFailed", { reason: node.startError })}</span>
+                  </Tooltip>
                 ) : (
                   // Opened, the page under it says why and offers the switch
                   node && !open && t("node.offlineHint")

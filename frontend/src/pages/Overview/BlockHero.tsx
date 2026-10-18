@@ -37,6 +37,8 @@ export function Stopped() {
   const stagger = useStagger();
   // Shared with the node bar above, so a start from either shows on both
   const { busy, err, toggle: start, waiting } = useNodeSwitch();
+  // Why the last start failed, the app's own at launch included, until one succeeds
+  const failed = useNode()?.startError;
 
   // Laid out as the greeting's pages: the glow behind, the mark, a big
   // title over a line, and the one button
@@ -54,10 +56,10 @@ export function Stopped() {
             <p className="max-w-md text-muted-foreground">{t("overview.stopped.desc")}</p>
           </div>
         </motion.div>
-        {err && (
+        {(err || failed) && (
           <motion.div variants={STAGGER.item} className="w-full max-w-md">
             <Notice tone="critical" className="text-left">
-              {err}
+              {err || t("node.startFailedNote", { reason: failed ?? "" })}
             </Notice>
           </motion.div>
         )}

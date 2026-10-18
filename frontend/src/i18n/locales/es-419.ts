@@ -276,6 +276,8 @@ const es: Dict = {
   "node.waitTor": "Esperando a Tor… {n} %",
   "node.waitTorFailed": "Esperando a Tor",
   "node.offlineHint": "Conéctate para ver tu saldo y enviar LAX.",
+  "node.startFailed": "No se pudo iniciar: {reason}",
+  "node.startFailedNote": "El nodo no pudo iniciarse la última vez que lo intentó: {reason}",
   "overview.stopped.title": "No estás conectado",
   "overview.stopped.desc":
     "Conéctate para sincronizar con la red Parallax, verificar tú mismo cada bloque y atender tu billetera sin terceros.",

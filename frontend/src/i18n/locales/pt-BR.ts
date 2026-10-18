@@ -276,6 +276,8 @@ const ptBR: Dict = {
   "node.waitTor": "Aguardando o Tor… {n}%",
   "node.waitTorFailed": "Aguardando o Tor",
   "node.offlineHint": "Conecte-se para ver seu saldo e enviar LAX.",
+  "node.startFailed": "Não foi possível iniciar: {reason}",
+  "node.startFailedNote": "O nó não conseguiu iniciar na última tentativa: {reason}",
   "overview.stopped.title": "Você não está conectado",
   "overview.stopped.desc":
     "Conecte-se para sincronizar com a rede Parallax, verificar cada bloco você mesmo e atender sua carteira sem depender de terceiros.",
