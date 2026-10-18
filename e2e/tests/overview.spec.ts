@@ -12,19 +12,23 @@ const send = (page: import("@playwright/test").Page, lax: string) =>
     gasLimit: 21000,
   });
 
-test("the account card shows the account, its address and its balance", async ({ page, app }) => {
-  await nodeRunning(page);
-  const card = page.getByRole("region", { name: FUNDED.name });
-  await expect(card.getByText(FUNDED.name, { exact: true })).toBeVisible();
-  // The address in full, in groups of four
-  await expect(card).toContainText(FUNDED.address);
-  await expect(card.getByText("1,000,000")).toBeVisible();
-  await expect(card.getByText("At block #0")).toBeVisible();
+test(
+  "the account card shows the account, its address and its balance",
+  { tag: "@clipboard" },
+  async ({ page, app }) => {
+    await nodeRunning(page);
+    const card = page.getByRole("region", { name: FUNDED.name });
+    await expect(card.getByText(FUNDED.name, { exact: true })).toBeVisible();
+    // The address in full, in groups of four
+    await expect(card).toContainText(FUNDED.address);
+    await expect(card.getByText("1,000,000")).toBeVisible();
+    await expect(card.getByText("At block #0")).toBeVisible();
 
-  await card.getByRole("button", { name: "Copy" }).click();
-  await expect(card.getByRole("button", { name: "Copied" })).toBeVisible();
-  await expectClipboard(app, FUNDED.address);
-});
+    await card.getByRole("button", { name: "Copy" }).click();
+    await expect(card.getByRole("button", { name: "Copied" })).toBeVisible();
+    await expectClipboard(app, FUNDED.address);
+  },
+);
 
 test("Send and Receive open their pages", async ({ page }) => {
   const card = page.getByRole("region", { name: FUNDED.name });

@@ -148,7 +148,7 @@ test.describe("contacts", () => {
     await expect(row(page, BOB.name)).toBeVisible();
   });
 
-  test("copying a contact's address, and sending to it", async ({ app, page }) => {
+  test("copying a contact's address, and sending to it", { tag: "@clipboard" }, async ({ app, page }) => {
     await seedContacts(page, ALICE);
     await row(page, ALICE.name).click();
     // The opened contact's, not the sidebar account's

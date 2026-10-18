@@ -12,7 +12,7 @@ async function fillVerify(page: Page, v: { address: string; message: string; sig
 }
 
 test.describe("messages", () => {
-  test("a message signed is shared, then verifies as the account's", async ({ app, page }) => {
+  test("a message signed is shared, then verifies as the account's", { tag: "@clipboard" }, async ({ app, page }) => {
     await goTo(page, "Sign message");
     const main = page.getByRole("main");
     await expect(main.getByText("Before you sign")).toBeVisible();

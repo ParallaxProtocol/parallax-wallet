@@ -43,7 +43,7 @@ type Options = {
 };
 
 type Fixtures = {
-  /** The app's home: its config in .config/Parallax, the node's chain in .parallax. */
+  /** The app's home: its config where configDir says, Electron's in Electron, the node's chain in .parallax. */
   home: string;
   app: ElectronApplication;
   /** The main window. */
@@ -77,7 +77,9 @@ function seedConfig(home: string, seed: Seed, extra: Record<string, unknown>) {
 export const configDir = (home: string) =>
   process.platform === "win32"
     ? path.join(home, "AppData", "Roaming", "Parallax")
-    : path.join(home, ".config", "Parallax");
+    : process.platform === "darwin"
+      ? path.join(home, "Library", "Application Support", "Parallax")
+      : path.join(home, ".config", "Parallax");
 
 /** Writes the app's config (gui.json) in `home`, for an app about to be launched there. */
 export function writeConfig(home: string, cfg: Record<string, unknown>) {
@@ -116,6 +118,9 @@ export async function launchApp(home: string): Promise<ElectronApplication> {
       }),
       // The development build: the development chain may run (backend/devchain.go)
       PARALLAX_DEV: "1",
+      // Electron's own folder (its window state, its single-instance lock) in the home too,
+      // which macOS wouldn't take from $HOME
+      PARALLAX_USER_DATA: path.join(home, "Electron"),
       LANG: "en_US.UTF-8",
     },
   });

@@ -1,6 +1,6 @@
 import { test, expect, call, goTo, FUNDED, OTHER, expectClipboard } from "../fixtures";
 
-test("shows the account's whole address, as a QR code too, to copy", async ({ app, page }) => {
+test("shows the account's whole address, as a QR code too, to copy", { tag: "@clipboard" }, async ({ app, page }) => {
   await goTo(page, "Receive");
   const card = page.getByLabel("Your address");
   await expect(card).toBeVisible();

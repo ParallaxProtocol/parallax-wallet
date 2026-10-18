@@ -100,6 +100,43 @@ jobs:
           go test ./backend/ -run '^TestHardenedRuntime$' -count=1 -v
           sudo -E env "PATH=$PATH" go test ./backend/ -run '^TestHardenedRuntime$' -count=1 -v
 
+  # The whole end-to-end suite on macOS, as it runs on Linux: the real app
+  # on the runner's desktop, its backend signed with the hardened runtime
+  # (make backend)
+  macos-e2e:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.27"
+          check-latest: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Build and test
+        env:
+          GOPRIVATE: github.com/ParallaxProtocol/*
+        run: make e2e
+
+      # Every run: a test that failed and passed on its retry fails the job
+      # no more, and its attachments are kept only here
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-e2e-report
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/
+          retention-days: 14
+
   # The end-to-end tests that are Windows' own (e2e/tests/windows-shell.spec.ts:
   # the shell's processes shielded, and the app working under it) and the
   # app's core flows, on Windows as released: the real app on a runner's
@@ -125,7 +162,7 @@ jobs:
         shell: bash
         env:
           GOPRIVATE: github.com/ParallaxProtocol/*
-        run: make e2e E2E_ARGS="tests/windows-shell.spec.ts tests/smoke.spec.ts tests/lock.spec.ts tests/bridge-seal.spec.ts"
+        run: make e2e E2E_ARGS="tests/windows-shell.spec.ts tests/smoke.spec.ts tests/lock.spec.ts tests/bridge-seal.spec.ts tests/settings-security.spec.ts"
 
       # Every run: a test that failed and passed on its retry fails the job
       # no more, and its attachments (the backend's goroutines, the trace)

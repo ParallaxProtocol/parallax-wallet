@@ -25,15 +25,19 @@ async function importKey(page: Page, key: string) {
   await expect(page.getByRole("heading", { name: "Single keys" })).toBeVisible();
 }
 
-test("a private key pasted in leaves the clipboard once it's imported", async ({ app, page }) => {
-  // As copied from elsewhere: a newline after it, which the field's value hasn't
-  const pasted = `${OTHER.key}\n`;
-  await copy(app, pasted);
-  await importKey(page, OTHER.key);
-  await expect.poll(() => clipboard(app)).not.toBe(pasted);
-});
+test(
+  "a private key pasted in leaves the clipboard once it's imported",
+  { tag: "@clipboard" },
+  async ({ app, page }) => {
+    // As copied from elsewhere: a newline after it, which the field's value hasn't
+    const pasted = `${OTHER.key}\n`;
+    await copy(app, pasted);
+    await importKey(page, OTHER.key);
+    await expect.poll(() => clipboard(app)).not.toBe(pasted);
+  },
+);
 
-test("a key the clipboard doesn't hold leaves what it holds", async ({ app, page }) => {
+test("a key the clipboard doesn't hold leaves what it holds", { tag: "@clipboard" }, async ({ app, page }) => {
   const other = `not a key, copied ${Date.now()}`;
   await copy(app, other);
   await importKey(page, OTHER.key);
@@ -41,17 +45,21 @@ test("a key the clipboard doesn't hold leaves what it holds", async ({ app, page
   await expect.poll(() => clipboard(app), { timeout: 2_000 }).toBe(other);
 });
 
-test("a recovery phrase pasted in leaves the clipboard once it's imported", async ({ app, page }) => {
-  // In capitals, as some write it down, and spaced as pasted from a note
-  const pasted = `  ${PHRASE.toUpperCase().split(" ").join("  ")}\n`;
-  await copy(app, pasted);
-  await openSettings(page, "Accounts");
-  await page.getByRole("button", { name: "Import accounts" }).click();
-  await page.getByRole("button", { name: /^Import a recovery phrase/ }).click();
-  await page.getByLabel("Recovery phrase", { exact: true }).fill(PHRASE);
-  await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page.getByRole("heading", { name: "Choose accounts" })).toBeVisible();
-  await page.getByRole("button", { name: "Import", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Recovery phrases" })).toBeVisible();
-  await expect.poll(() => clipboard(app)).not.toBe(pasted);
-});
+test(
+  "a recovery phrase pasted in leaves the clipboard once it's imported",
+  { tag: "@clipboard" },
+  async ({ app, page }) => {
+    // In capitals, as some write it down, and spaced as pasted from a note
+    const pasted = `  ${PHRASE.toUpperCase().split(" ").join("  ")}\n`;
+    await copy(app, pasted);
+    await openSettings(page, "Accounts");
+    await page.getByRole("button", { name: "Import accounts" }).click();
+    await page.getByRole("button", { name: /^Import a recovery phrase/ }).click();
+    await page.getByLabel("Recovery phrase", { exact: true }).fill(PHRASE);
+    await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page.getByRole("heading", { name: "Choose accounts" })).toBeVisible();
+    await page.getByRole("button", { name: "Import", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Recovery phrases" })).toBeVisible();
+    await expect.poll(() => clipboard(app)).not.toBe(pasted);
+  },
+);

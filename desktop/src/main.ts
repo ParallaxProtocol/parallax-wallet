@@ -47,6 +47,11 @@ const PROFILE = (() => {
   return !app.isPackaged && /^[a-z0-9][a-z0-9-]{0,31}$/.test(p) ? p : "";
 })();
 if (PROFILE) app.setPath("userData", path.join(app.getPath("appData"), `Parallax Wallet (${PROFILE})`));
+// The end-to-end tests give each app a folder of its own (e2e/fixtures.ts):
+// on macOS Electron finds its own by the system, not by $HOME. Packaged
+// apps have none
+const TEST_USER_DATA = process.env.PARALLAX_USER_DATA;
+if (!app.isPackaged && TEST_USER_DATA) app.setPath("userData", TEST_USER_DATA);
 const isMac = process.platform === "darwin";
 const isWindows = process.platform === "win32";
 

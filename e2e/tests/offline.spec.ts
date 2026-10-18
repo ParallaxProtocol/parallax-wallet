@@ -97,7 +97,7 @@ test.describe("online and offline", () => {
     }
   });
 
-  test("the signer refuses a request it can't sign", async ({ app, page }, info) => {
+  test("the signer refuses a request it can't sign", { tag: "@clipboard" }, async ({ app, page }, info) => {
     // A signer that holds FUNDED, not the watch-only account the request is from
     const signer = await launchSigner(FUNDED.name, FUNDED.key);
     try {
@@ -137,7 +137,7 @@ test.describe("online and offline", () => {
     }
   });
 
-  test("Broadcast refuses what isn't a signed transaction", async ({ app, page }, info) => {
+  test("Broadcast refuses what isn't a signed transaction", { tag: "@clipboard" }, async ({ app, page }, info) => {
     await nodeRunning(page);
     await addWatchOnly(page, OTHER.address);
     await goTo(page, "Broadcast");
