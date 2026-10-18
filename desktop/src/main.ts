@@ -228,7 +228,7 @@ async function saveBackup(fileName: string, contents: string): Promise<boolean> 
   const name = path.basename(fileName).replace(/[^\w.-]/g, "_") || "parallax-keystore.json";
   const opts = {
     title: "Save wallet backup",
-    defaultPath: path.join(app.getPath("documents"), name.endsWith(".json") ? name : `${name}.json`),
+    defaultPath: path.join(documentsDir(), name.endsWith(".json") ? name : `${name}.json`),
     filters: [{ name: "Keystore file", extensions: ["json"] }],
   };
   const res = mainWindow ? await dialog.showSaveDialog(mainWindow, opts) : await dialog.showSaveDialog(opts);
@@ -254,12 +254,26 @@ async function pickFolder(title: string, start: string): Promise<string | null> 
   }
   const opts: Electron.OpenDialogOptions = {
     title: title.slice(0, 120),
-    defaultPath: at || app.getPath("documents"),
+    defaultPath: at || documentsDir(),
     properties: ["openDirectory", "createDirectory", "promptToCreate"],
   };
   const res = mainWindow ? await dialog.showOpenDialog(mainWindow, opts) : await dialog.showOpenDialog(opts);
   if (res.canceled || res.filePaths.length === 0) return null;
   return res.filePaths[0];
+}
+
+/**
+ * Where the save and open dialogs start: the user's Documents folder, or
+ * their home where the system can't say where Documents is (on Windows, a
+ * folder redirected away or gone), rather than fail the save before it
+ * even asks.
+ */
+function documentsDir(): string {
+  try {
+    return app.getPath("documents");
+  } catch {
+    return app.getPath("home");
+  }
 }
 
 /**
@@ -272,7 +286,7 @@ async function saveContacts(format: "json" | "csv", contents: string): Promise<b
   const date = new Date().toISOString().slice(0, 10);
   const opts = {
     title: "Export contacts",
-    defaultPath: path.join(app.getPath("documents"), `parallax-contacts-${date}.${format}`),
+    defaultPath: path.join(documentsDir(), `parallax-contacts-${date}.${format}`),
     filters: [format === "json" ? { name: "JSON", extensions: ["json"] } : { name: "CSV", extensions: ["csv"] }],
   };
   const res = mainWindow ? await dialog.showSaveDialog(mainWindow, opts) : await dialog.showSaveDialog(opts);
@@ -290,7 +304,7 @@ async function pickHistoryPath(fileName: string): Promise<string | null> {
   const name = path.basename(fileName).replace(/[^\w.-]/g, "_") || "parallax-activity.csv";
   const opts = {
     title: "Export activity",
-    defaultPath: path.join(app.getPath("documents"), name.toLowerCase().endsWith(".csv") ? name : `${name}.csv`),
+    defaultPath: path.join(documentsDir(), name.toLowerCase().endsWith(".csv") ? name : `${name}.csv`),
     filters: [{ name: "CSV", extensions: ["csv"] }],
   };
   const res = mainWindow ? await dialog.showSaveDialog(mainWindow, opts) : await dialog.showSaveDialog(opts);
@@ -320,7 +334,7 @@ async function saveSigningDoc(fileName: string, contents: string): Promise<boole
   const name = path.basename(fileName).replace(/[^\w.-]/g, "_") || "parallax-signing.json";
   const opts = {
     title: "Save for offline signing",
-    defaultPath: path.join(app.getPath("documents"), name.endsWith(".json") ? name : `${name}.json`),
+    defaultPath: path.join(documentsDir(), name.endsWith(".json") ? name : `${name}.json`),
     filters: [{ name: "JSON", extensions: ["json"] }],
   };
   const res = mainWindow ? await dialog.showSaveDialog(mainWindow, opts) : await dialog.showSaveDialog(opts);
