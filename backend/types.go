@@ -280,9 +280,10 @@ type NodeStatus struct {
 	DiskUsedBytes uint64 `json:"diskUsedBytes"`
 	MemUsedBytes  uint64 `json:"memUsedBytes"`
 	ClientVersion string `json:"clientVersion"`
-	RPCEndpoint   string `json:"rpcEndpoint"` // empty if HTTP-RPC disabled
-	DevChain      bool   `json:"devChain"`    // running the private development chain
-	DevHeld       bool   `json:"devHeld"`     // the development chain holds its blocks back (SetDevHold)
+	RPCEndpoint   string `json:"rpcEndpoint"`          // empty if HTTP-RPC disabled
+	DevChain      bool   `json:"devChain"`             // running the private development chain
+	DevHeld       bool   `json:"devHeld"`              // the development chain holds its blocks back (SetDevHold)
+	StartError    string `json:"startError,omitempty"` // why the node's last start failed, until one succeeds
 }
 
 // NodeEvent is broadcast as the "node" event.

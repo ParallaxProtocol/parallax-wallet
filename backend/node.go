@@ -47,6 +47,7 @@ type NodeController struct {
 	stack     *node.Node
 	parallax  *protocol.Parallax
 	startedAt time.Time
+	startErr  string        // why the last start failed, until one succeeds
 	stopCh    chan struct{} // closed by Stop() so background goroutines exit
 	dev       bool          // running the development chain (devchain.go)
 	// busy is set while its data is moved or cleared (storage.go): the
@@ -165,7 +166,17 @@ func (n *NodeController) Stack() *node.Node {
 //  7. spawn process metrics collector (once per process)
 //  8. spawn the free-disk-space monitor (per Start, stops on Stop)
 //  9. log a one-time legacy receipts warning if the freezer needs migration
-func (n *NodeController) Start(ctx context.Context) error {
+func (n *NodeController) Start(ctx context.Context) (err error) {
+	// Why it didn't start, kept for Status until it starts: an auto-start's
+	// error has no one else to tell
+	defer func() {
+		n.mu.Lock()
+		n.startErr = ""
+		if err != nil {
+			n.startErr = err.Error()
+		}
+		n.mu.Unlock()
+	}()
 	n.startMu.Lock()
 	defer n.startMu.Unlock()
 	n.mu.Lock()
@@ -383,13 +394,15 @@ func (n *NodeController) Status() NodeStatus {
 	parallax := n.parallax
 	startedAt := n.startedAt
 	dev := n.dev
+	startErr := n.startErr
 	n.mu.RUnlock()
 
 	guiCfg := n.cfg.Get()
 	st := NodeStatus{
-		DataDir:   nodeDataDir(guiCfg),
-		ChainID:   chainparams.MainnetChainConfig.ChainID.Uint64(),
-		NetworkID: 2110,
+		StartError: startErr,
+		DataDir:    nodeDataDir(guiCfg),
+		ChainID:    chainparams.MainnetChainConfig.ChainID.Uint64(),
+		NetworkID:  2110,
 		// The daemon's version, which is what "client" means to a node
 		// operator; the GUI's own version shows in the status bar
 		ClientVersion: "Parallax/v" + parallaxpkg.VersionWithMeta,

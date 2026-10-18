@@ -238,6 +238,8 @@ export type NodeStatus = {
   devChain: boolean;
   /** The development chain holds its blocks back: what is sent waits in the pool. */
   devHeld: boolean;
+  /** Why the node's last start failed, until one succeeds. */
+  startError?: string;
 };
 
 /**

@@ -230,6 +230,14 @@ func applyRPCFlags(g GUIConfig, cfg *node.Config) error {
 	if g.IPCDisabled {
 		cfg.IPCPath = ""
 	}
+	// A data directory deep enough leaves no room for the IPC socket's path
+	// in it (a development chain's, below a long home, say): the node runs
+	// without IPC, which only outside tools use, rather than not at all
+	if cfg.IPCPath != "" && !ipcEndpointFits(cfg.IPCEndpoint()) {
+		logging.Warn("The data directory's path is too long for the node's IPC socket: the node runs without IPC",
+			"endpoint", cfg.IPCEndpoint())
+		cfg.IPCPath = ""
+	}
 	if g.RPCBatchLimit != nil {
 		cfg.BatchRequestLimit = *g.RPCBatchLimit
 	}
