@@ -85,6 +85,11 @@
   --critical-ink: #ff7a7a;
   --info-ink: #6aa8ff;
   --off: #5d5e64;
+  /* Tor's purple, on the node bar while Tor is on: a tint over its glass,
+     its edge, and its text */
+  --tor-tint: rgb(126 72 170 / 20%);
+  --tor-edge: rgb(176 124 222 / 32%);
+  --tor-ink: #cfa8f2;
 }
 
 :root[data-theme="light"] {
@@ -141,6 +146,9 @@
   --critical-ink: #c42b2b;
   --info-ink: #0065cd;
   --off: #b4b4b9;
+  --tor-tint: rgb(108 59 135 / 9%);
+  --tor-edge: rgb(108 59 135 / 26%);
+  --tor-ink: #6c3b87;
 }
 
 /* Frosted glass, for cards and options that sit over the glow */
@@ -201,6 +209,9 @@ button.glass:hover,
   --color-critical-ink: var(--critical-ink);
   --color-info-ink: var(--info-ink);
   --color-off: var(--off);
+  --color-tor-tint: var(--tor-tint);
+  --color-tor-edge: var(--tor-edge);
+  --color-tor-ink: var(--tor-ink);
   --color-glow: var(--glow);
   --color-segment-well: var(--segment-well);
   --color-segment-thumb: var(--segment-thumb);

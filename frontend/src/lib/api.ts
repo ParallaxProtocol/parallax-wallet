@@ -240,6 +240,8 @@ export type NodeStatus = {
   devHeld: boolean;
   /** Why the node's last start failed, until one succeeds. */
   startError?: string;
+  /** The running node waits on a restart for a saved setting it reads only as it starts. */
+  restartPending?: boolean;
 };
 
 /**

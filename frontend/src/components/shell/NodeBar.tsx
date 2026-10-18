@@ -23,7 +23,10 @@ import { TOP_BAR_HEIGHT } from "./TopBar";
 import { useAssistant } from "../../lib/assistantContext";
 import { NodeSwitchContext, useNodeSwitch } from "../../lib/nodeSwitch";
 import { BAR_FADE, BAR_GLASS, BAR_SURFACE } from "./barSurface";
-import { useTorStatus } from "../../lib/torStatus";
+import { torBarKind, useTorStatus } from "../../lib/torStatus";
+import { OnionSymbol } from "../ui/symbols";
+import { ActivitySpinner } from "../ui/ActivitySpinner";
+import { FADE_IN, FADE_OUT } from "../../lib/motion";
 
 const NodePage = lazy(() => import("../../pages/Overview"));
 
@@ -45,6 +48,28 @@ const STATE_GRADE: Record<ReturnType<typeof nodeState>, Grade> = {
   synced: "good",
 };
 
+/**
+ * Swap is a line of the bar changing in place, keyed by what it says: the
+ * old one rising away as the new one rises in, as the save bar's message.
+ */
+function Swap({ swap, className = "", children }: { swap: string; className?: string; children: ReactNode }) {
+  return (
+    <span className={`relative flex min-w-0 ${className}`}>
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={swap}
+          className="block min-w-0 truncate"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0, transition: FADE_IN }}
+          exit={{ opacity: 0, y: -6, transition: FADE_OUT }}
+        >
+          {children}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
 export function NodeSheetProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   return <NodeSheetContext.Provider value={{ open, setOpen }}>{children}</NodeSheetContext.Provider>;
@@ -58,6 +83,7 @@ export function NodeSwitchProvider({ children }: { children: ReactNode }) {
   const refresh = useRefresh();
   const running = !!node?.running;
   const [busy, setBusy] = useState(false);
+  const [restarting, setRestarting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   // With Tor on, the node starts once Tor is connected, never before
   const t = useT();
@@ -82,7 +108,22 @@ export function NodeSwitchProvider({ children }: { children: ReactNode }) {
       refresh();
     }
   };
-  return <NodeSwitchContext.Provider value={{ busy, err, toggle, waiting }}>{children}</NodeSwitchContext.Provider>;
+  const restart = async () => {
+    setRestarting(true);
+    setErr(null);
+    try {
+      await api.stopNode();
+      await api.startNode();
+    } finally {
+      setRestarting(false);
+      refresh();
+    }
+  };
+  return (
+    <NodeSwitchContext.Provider value={{ busy: busy || restarting, err, toggle, restarting, restart, waiting }}>
+      {children}
+    </NodeSwitchContext.Provider>
+  );
 }
 
 /**
@@ -101,7 +142,30 @@ export default function NodeBar() {
   const state = nodeState(node);
   const progress = syncProgress(node);
   const running = !!node?.running;
-  const { busy, err, toggle, waiting } = useNodeSwitch();
+  const { busy, err, toggle, restarting, restart, waiting } = useNodeSwitch();
+  // With Tor on, the bar takes Tor's tint and says how Tor is doing
+  const tor = useTorStatus();
+  const torKind = torBarKind(tor);
+  const torOn = torKind !== "off";
+  // What the bar's right end says. Restarting with Tor on, that the node
+  // comes back behind it, rather than Tor's state between the stop and the
+  // start. Tor not connected, that first: a restart would only wait on it.
+  // Tor connected with the node offline, that the node connects through it
+  const note = restarting
+    ? torOn
+      ? "restarting"
+      : null
+    : torKind === "starting" || torKind === "failed" || torKind === "nodeRestart"
+      ? torKind
+      : running && node.restartPending
+        ? "settings"
+        : torOn
+          ? running
+            ? torKind
+            : torKind === "readyOnion"
+              ? "standbyOnion"
+              : "standby"
+          : null;
   // The window's height, which the open panel fills under the title bar
   const [vh, setVh] = useState(window.innerHeight);
   useEffect(() => {
@@ -127,13 +191,15 @@ export default function NodeBar() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, setOpen]);
 
-  const switchLabel = busy
-    ? running
-      ? t("node.stopping")
-      : t("node.starting")
-    : running
-      ? t("node.stop")
-      : t("node.start");
+  const switchLabel = restarting
+    ? t("node.restarting")
+    : busy
+      ? running
+        ? t("node.stopping")
+        : t("node.starting")
+      : running
+        ? t("node.stop")
+        : t("node.start");
   const openLabel = open ? t("node.collapse") : t("node.expand");
 
   return (
@@ -141,7 +207,7 @@ export default function NodeBar() {
       <motion.section
         aria-label={t("nav.network")}
         // At rest the cards' glass, as the empty wallet's Settings pill, lit under the pointer as it opens on a click; opened, the page's thicker glass
-        className={`no-drag fixed z-40 flex flex-col overflow-hidden ${open ? BAR_SURFACE : `${BAR_GLASS} hover:bg-[var(--glass-hover)]`} ${BAR_FADE}`}
+        className={`no-drag fixed z-40 flex flex-col overflow-hidden ${open ? BAR_SURFACE : `${BAR_GLASS} hover:bg-[var(--glass-hover)]`} ${torOn ? "border-tor-edge" : ""} ${BAR_FADE}`}
         style={{ left: NODE_BAR_GAP, bottom: NODE_BAR_GAP }}
         initial={false}
         // A capsule at rest, as the assistant bar; opened, a panel's corners
@@ -159,7 +225,7 @@ export default function NodeBar() {
         <div
           className={`flex shrink-0 items-center gap-5 border-b pr-[15px] pl-5 text-sm text-muted-foreground tabular-nums transition-colors ${
             open ? "border-border" : "border-transparent"
-          }`}
+          } ${torOn ? "bg-tor-tint" : ""}`}
           style={{ height: NODE_BAR_HEIGHT }}
           onClick={(e) => {
             if (!open && !(e.target as HTMLElement).closest("button")) setOpen(true);
@@ -170,16 +236,54 @@ export default function NodeBar() {
             it, starting where the dot does */}
           {/* The symbol as far from its text as the buttons at the other end are apart */}
           <span className="flex min-w-0 items-center gap-5">
-            <NODE_ICON className="size-5 shrink-0" strokeWidth={NODE_ICON_STROKE} aria-hidden />
+            {/* Restarting, a spinner in the symbol's place, the one between them crossfading */}
+            <span className="relative grid size-5 shrink-0 place-items-center">
+              <AnimatePresence initial={false}>
+                <motion.span
+                  key={restarting ? "spinner" : "icon"}
+                  className="absolute inset-0 grid place-items-center"
+                  initial={{ opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1, transition: FADE_IN }}
+                  exit={{ opacity: 0, scale: 0.6, transition: FADE_OUT }}
+                >
+                  {restarting ? (
+                    <ActivitySpinner size={20} className="text-info-ink" />
+                  ) : (
+                    <NODE_ICON className="size-5" strokeWidth={NODE_ICON_STROKE} aria-hidden />
+                  )}
+                </motion.span>
+              </AnimatePresence>
+            </span>
             <span className="flex min-w-0 flex-col">
               <span className="flex min-w-0 items-center gap-2">
-                <Indicator grade={STATE_GRADE[state]} ping={running} cause={state} />
-                <span className="truncate text-[15px] font-semibold text-foreground">
-                  {open ? t("nav.network") : t(`node.state.${state}`)}
-                </span>
+                {/* Restarting, it's on its way back rather than offline, between its stop and its start too */}
+                <Indicator
+                  grade={restarting ? "info" : STATE_GRADE[state]}
+                  ping={running || restarting}
+                  cause={restarting ? "restarting" : state}
+                />
+                {(() => {
+                  const title = open
+                    ? t("nav.network")
+                    : restarting
+                      ? t("node.state.restarting")
+                      : t(`node.state.${state}`);
+                  return (
+                    <Swap swap={title} className="text-[15px] font-semibold text-foreground">
+                      {title}
+                    </Swap>
+                  );
+                })()}
               </span>
-              <span className="truncate text-sm">
-                {running ? (
+              <Swap
+                swap={
+                  restarting ? "restarting" : running ? "running" : node?.startError && !open ? "failed" : "offline"
+                }
+                className="text-sm"
+              >
+                {restarting ? (
+                  t("node.restartingHint")
+                ) : running ? (
                   <>
                     <Tooltip content={t("clock.bestBlock")}>
                       <span>
@@ -203,11 +307,11 @@ export default function NodeBar() {
                   // Opened, the page under it says why and offers the switch
                   node && !open && t("node.offlineHint")
                 )}
-              </span>
+              </Swap>
             </span>
           </span>
 
-          {running && state === "syncing" && (
+          {running && !restarting && state === "syncing" && (
             <span className="flex items-center gap-2.5">
               <Meter value={progress} live thick className="w-56" label={t("node.state.syncing")} />
               <Counter
@@ -219,6 +323,53 @@ export default function NodeBar() {
           )}
 
           <span className="flex-1" />
+
+          {/* What waits on the node, one thing at a time: how Tor is doing,
+              everything the app sends going through it, or why nothing goes
+              out yet; or that the running node waits on a restart, to go
+              behind Tor or for a saved setting it reads only as it starts,
+              with the restart at hand */}
+          {note && (
+            <Swap
+              swap={note}
+              className={`shrink font-medium ${note === "settings" ? "text-foreground" : "text-tor-ink"}`}
+            >
+              <span className="flex min-w-0 items-center gap-2" role="status">
+                {note === "settings" ? (
+                  <Indicator grade="warn" />
+                ) : note === "failed" ? (
+                  <TriangleAlert className="size-4 shrink-0" aria-hidden />
+                ) : (
+                  <OnionSymbol
+                    className={`size-4 shrink-0 ${note === "restarting" || note === "starting" ? "animate-pulse" : ""}`}
+                    aria-hidden
+                  />
+                )}
+                <span className="truncate">
+                  {note === "settings"
+                    ? t("node.restartPending")
+                    : note === "restarting"
+                      ? t("tor.banner.nodeRestarting")
+                      : note === "starting"
+                        ? t("tor.banner.starting", { n: tor?.progress ?? 0 })
+                        : t(`tor.banner.${note}`)}
+                </span>
+                {(note === "nodeRestart" || note === "settings") && (
+                  <button
+                    type="button"
+                    className="btn btn-tinted shrink-0 rounded-full px-3"
+                    onClick={() =>
+                      restart().catch(() => {
+                        /* the bar shows why it didn't start */
+                      })
+                    }
+                  >
+                    {t("settings.save.restart")}
+                  </button>
+                )}
+              </span>
+            </Swap>
+          )}
 
           {/* A failed switch: its symbol, the message on hover. Opened on a
               stopped node, the page shows the error by its button */}
@@ -235,7 +386,7 @@ export default function NodeBar() {
             </Tooltip>
           )}
 
-          {running ? (
+          {running || restarting ? (
             <Tooltip content={switchLabel}>
               <button
                 type="button"
@@ -244,7 +395,7 @@ export default function NodeBar() {
                 disabled={busy || !node}
                 aria-label={switchLabel}
               >
-                {busy ? <Loader2 className="size-4 animate-spin" /> : <Power className="size-4" />}
+                {busy && !restarting ? <Loader2 className="size-4 animate-spin" /> : <Power className="size-4" />}
               </button>
             </Tooltip>
           ) : (
@@ -257,8 +408,9 @@ export default function NodeBar() {
                 onClick={toggle}
                 disabled={busy || !!waiting}
               >
-                {(busy || waiting) && <Loader2 className="size-3.5 animate-spin" />}
-                {waiting ?? switchLabel}
+                {/* Waiting on Tor, the line beside it says so */}
+                {(busy || (waiting && !torOn)) && <Loader2 className="size-3.5 animate-spin" />}
+                {waiting && !torOn ? waiting : switchLabel}
               </button>
             )
           )}

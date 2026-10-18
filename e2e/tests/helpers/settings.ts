@@ -65,7 +65,6 @@ export const saveBar = {
   // Its message holds the restart it needs, when it needs one
   unsaved: (page: Page) => sheet(page).getByText(/^Unsaved changes/),
   needsRestart: (page: Page) => sheet(page).getByText("Will require node restart", { exact: true }),
-  restartRequired: (page: Page) => sheet(page).getByText("Restart required to apply changes", { exact: true }),
   appRestartRequired: (page: Page) => sheet(page).getByText("Restart the app to apply changes", { exact: true }),
   save: (page: Page) => sheet(page).getByRole("button", { name: "Save", exact: true }),
   discard: (page: Page) => sheet(page).getByRole("button", { name: "Discard", exact: true }),

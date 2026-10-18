@@ -13,10 +13,14 @@ test("a node setting waits for Save while the node runs, then for the node's res
 
   await saveBar.save(page).click();
   await savedAs(page, "syncMode", "full");
-  await expect(saveBar.restartRequired(page)).toBeVisible();
+  // The node bar asks for the restart, the save bar gone once it says it saved
+  const nodeBar = page.locator('section[aria-label="Network"]');
+  const restartPending = nodeBar.getByText("Restart to apply your changes", { exact: true });
+  await expect(restartPending).toBeVisible();
+  await expect(saveBar.unsaved(page)).toBeHidden();
 
-  await sheet(page).getByRole("button", { name: "Restart node" }).click();
-  await expect(saveBar.restartRequired(page)).toBeHidden({ timeout: 60_000 });
+  await nodeBar.getByRole("button", { name: "Restart node" }).click();
+  await expect(restartPending).toBeHidden({ timeout: 60_000 });
   await nodeRunning(page);
   await expect(row(sheet(page), "Sync mode").getByText("Restart", { exact: true })).toBeHidden();
   await expect(sheet(page).getByRole("radio", { name: "Full" })).toBeChecked();

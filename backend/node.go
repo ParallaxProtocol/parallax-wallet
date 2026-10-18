@@ -5,6 +5,7 @@ package backend
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
@@ -70,6 +71,9 @@ type NodeController struct {
 	cancelStart context.CancelFunc
 	// behindTor is set while the running node went behind Tor as it started
 	behindTor bool
+	// startedWith is the config the running node started with, for
+	// RestartPending to tell a saved change it hasn't read yet
+	startedWith GUIConfig
 
 	// The data directory's size, re-measured at most every diskUsageTTL:
 	// walking a multi-gigabyte chain database on every status poll is
@@ -290,6 +294,7 @@ func (n *NodeController) Start(ctx context.Context) (err error) {
 	n.stopCh = stopCh
 	n.dev = dev
 	n.behindTor = behindTor
+	n.startedWith = guiCfg
 	n.mu.Unlock()
 
 	// The development chain seals a block for each transaction, as
@@ -365,6 +370,45 @@ func (n *NodeController) Stop() error {
 	return err
 }
 
+// liveSettings are the config's fields (as JSON names) a running node
+// needs no restart for: the app applies them itself, at once or on its
+// next action (as Settings' LIVE_FIELDS), keeps them of its own (the
+// wallet's folder), or reads them only as the whole app starts (the
+// metrics, as Settings' APP_FIELDS), which a node restart doesn't apply
+// either. Every other field configures the node as it starts.
+var liveSettings = map[string]bool{
+	"bootstrapped": true, "theme": true, "disableAnimations": true, "avatarStyle": true,
+	"autoStartNode": true, "logLevel": true, "noUpdateCheck": true, "preventSleep": true,
+	"notifications": true, "clearLogsOnStartup": true, "autoLockMinutes": true,
+	// The peer list adds and removes them on the running node too (peer_admin.go)
+	"staticPeers": true, "trustedPeers": true,
+	"offlineSigner": true, "offlineFeeCapWei": true,
+	"mcpEnabled": true, "mcpPort": true, "mcpAllow": true,
+	"walletDir": true, "walletMovedFrom": true,
+	"metrics": true, "metricsExpensive": true, "metricsAddr": true, "metricsPort": true,
+}
+
+// nodeSettingsDiffer reports whether now changes a setting the node reads
+// only as it starts from what it started with: whether it waits on a
+// restart. A list left empty and one never set are the same.
+func nodeSettingsDiffer(started, now GUIConfig) bool {
+	a, errA := configMap(started)
+	b, errB := configMap(now)
+	if errA != nil || errB != nil {
+		return false
+	}
+	empty := func(v json.RawMessage) bool { s := string(v); return s == "" || s == "null" || s == "[]" }
+	for k, v := range b {
+		if liveSettings[k] {
+			continue
+		}
+		if w := a[k]; string(v) != string(w) && !(empty(v) && empty(w)) {
+			return true
+		}
+	}
+	return false
+}
+
 // BehindTor reports whether the running node went behind Tor as it
 // started; false while it's stopped.
 func (n *NodeController) BehindTor() bool {
@@ -395,6 +439,7 @@ func (n *NodeController) Status() NodeStatus {
 	startedAt := n.startedAt
 	dev := n.dev
 	startErr := n.startErr
+	startedWith := n.startedWith
 	n.mu.RUnlock()
 
 	guiCfg := n.cfg.Get()
@@ -414,6 +459,7 @@ func (n *NodeController) Status() NodeStatus {
 		return st
 	}
 	st.Running = true
+	st.RestartPending = nodeSettingsDiffer(startedWith, guiCfg)
 	// The running chain's own ID, rather than the mainnet constant
 	if cfg := parallax.BlockChain().Config(); cfg != nil && cfg.ChainID != nil {
 		st.ChainID = cfg.ChainID.Uint64()

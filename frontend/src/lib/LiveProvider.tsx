@@ -22,6 +22,8 @@ function sameNode(a: NodeStatus | null, b: NodeStatus): boolean {
     a.devHeld === b.devHeld &&
     a.diskUsedBytes === b.diskUsedBytes &&
     a.rpcEndpoint === b.rpcEndpoint &&
+    a.startError === b.startError &&
+    a.restartPending === b.restartPending &&
     Math.floor(a.uptimeSeconds / 60) === Math.floor(b.uptimeSeconds / 60) &&
     Math.abs(a.memUsedBytes - b.memUsedBytes) < 8 * 1024 * 1024
   );

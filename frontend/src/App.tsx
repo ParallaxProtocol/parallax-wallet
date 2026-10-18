@@ -41,7 +41,6 @@ import SettingsSheet from "./components/shell/SettingsSheet";
 import { useSettingsSheet, type SettingsPage, type SettingsSection } from "./lib/settingsSheet";
 import { SettingsSheetProvider } from "./lib/SettingsSheetProvider";
 import { TorProvider } from "./lib/TorProvider";
-import TorBar, { TorBarSpacer } from "./components/shell/TorBar";
 import { NotificationsProvider } from "./lib/notifications";
 import AssistantBar from "./components/shell/AssistantBar";
 import { LockGate } from "./components/shell/LockScreen";
@@ -229,10 +228,8 @@ function Shell({ offline, animate }: { offline: boolean; animate: boolean }) {
             <Sidebar />
             <div className="flex min-w-0 flex-1 flex-col bg-background">
               <TopBar />
-              <TorBarSpacer />
               <RoutedContent animate={animate} />
             </div>
-            <TorBar />
           </div>
         </Arrival>
       )}

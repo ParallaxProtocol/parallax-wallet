@@ -284,6 +284,9 @@ type NodeStatus struct {
 	DevChain      bool   `json:"devChain"`             // running the private development chain
 	DevHeld       bool   `json:"devHeld"`              // the development chain holds its blocks back (SetDevHold)
 	StartError    string `json:"startError,omitempty"` // why the node's last start failed, until one succeeds
+	// RestartPending is set while the running node waits on a restart for
+	// a saved setting it reads only as it starts (nodeSettingsDiffer)
+	RestartPending bool `json:"restartPending,omitempty"`
 }
 
 // NodeEvent is broadcast as the "node" event.

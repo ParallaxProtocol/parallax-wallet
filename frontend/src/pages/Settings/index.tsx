@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Activity,
@@ -115,10 +115,11 @@ export default function Settings() {
   const [orig, setOrig] = useState<GUIConfig | null>(null);
   const [saved, setSaved] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  // Stick around after Save until the node (or the app) restarts
-  const [restartPending, setRestartPending] = useState(false);
+  // Sticks around after Save until the app restarts. The node's own
+  // restart the node bar asks for, as long as the node waits on one
   const [appRestartPending, setAppRestartPending] = useState(false);
-  const [restarting, setRestarting] = useState(false);
+  const [appRestarting, setAppRestarting] = useState(false);
+  const refreshNode = useRefresh();
   // Changes that save without the save bar: those waiting for the typing to
   // pause, those being saved, and the flush that saves what's waiting, run
   // as Settings closes and before the node starts too
@@ -140,19 +141,11 @@ export default function Settings() {
   // Whether this build ships a Tor of its own, for the Tor settings
   const tor = useTorStatus();
   const torBundled = tor?.bundled ?? true;
-  // With Tor on, a restart waits for it to connect: the node starts behind it or not at all
-  const torWaiting =
-    !tor?.enabled || tor.state === "ready"
-      ? null
-      : tor.state === "starting"
-        ? t("node.waitTor", { n: tor.progress })
-        : t("node.waitTorFailed");
   useEffect(() => {
-    if (!nodeRunning) setRestartPending(false);
     // Started some other way (on launch, by an assistant) with the node's
-    // changes still waiting: saved now, and the restart they need asked for
-    else if (Object.keys(waiting.current).some((k) => !LIVE_FIELDS.has(k as keyof GUIConfig))) {
-      flush.current().then(() => setRestartPending(true));
+    // changes still waiting: saved now, the node bar asking for the restart they need
+    if (nodeRunning && Object.keys(waiting.current).some((k) => !LIVE_FIELDS.has(k as keyof GUIConfig))) {
+      flush.current().then(refreshNode);
     }
   }, [nodeRunning]);
   const { section: chosen, setSection, page } = useSettingsSheet();
@@ -169,6 +162,22 @@ export default function Settings() {
   const [wiped, setWiped] = useState(false);
   const [login, setLogin] = useState<{ supported: boolean; enabled: boolean }>({ supported: false, enabled: false });
   const swap = usePageSwap();
+  // Where the nav's selection sits: the chosen section's row, measured after
+  // each render (a section shown or hidden above it moves it too), set only
+  // when it moved
+  const navRef = useRef<HTMLElement>(null);
+  const [mark, setMark] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
+  useLayoutEffect(() => {
+    const row = navRef.current?.querySelector<HTMLElement>('[aria-current="page"]');
+    const next = row
+      ? { left: row.offsetLeft, top: row.offsetTop, width: row.offsetWidth, height: row.offsetHeight }
+      : null;
+    setMark((m) =>
+      m && next && m.left === next.left && m.top === next.top && m.width === next.width && m.height === next.height
+        ? m
+        : next,
+    );
+  });
 
   useEffect(() => {
     api.getConfig().then((c) => {
@@ -289,7 +298,8 @@ export default function Settings() {
     setErr(null);
     try {
       await api.updateConfig(cfg);
-      if (dirtyNeedsRestart) setRestartPending(true);
+      // The node bar asks for the node's restart as soon as it reads the node's status
+      if (dirtyNeedsRestart) refreshNode();
       if (dirtyNeedsAppRestart) setAppRestartPending(true);
       setOrig(cfg);
       setSaved(true);
@@ -300,27 +310,13 @@ export default function Settings() {
     }
   };
 
-  const restartNode = async () => {
-    setRestarting(true);
-    setErr(null);
-    try {
-      await api.stopNode();
-      await api.startNode();
-      setRestartPending(false);
-    } catch (e: any) {
-      setErr(e?.message || String(e));
-    } finally {
-      setRestarting(false);
-    }
-  };
-
   const restartApp = async () => {
-    setRestarting(true);
+    setAppRestarting(true);
     try {
       await api.restartApp();
     } catch (e: any) {
       setErr(e?.message || String(e));
-      setRestarting(false);
+      setAppRestarting(false);
     }
   };
 
@@ -401,9 +397,23 @@ export default function Settings() {
   return (
     <div className="flex min-h-0 flex-1">
       <nav
+        ref={navRef}
         aria-label={t("nav.settings")}
-        className="flex w-60 shrink-0 flex-col gap-0.5 overflow-y-auto border-r border-border p-3"
+        className="relative flex w-60 shrink-0 flex-col gap-0.5 overflow-y-auto border-r border-border p-3"
       >
+        {/* The selection, one for the nav, gliding to the section chosen. A
+            plain transform rather than a shared layout (layoutId), which
+            would hold it at its place on the screen while the sheet grows
+            out of its button around it */}
+        {mark && (
+          <motion.span
+            aria-hidden
+            className="pointer-events-none absolute top-0 left-0 rounded-lg bg-selected"
+            initial={false}
+            animate={{ x: mark.left, y: mark.top, width: mark.width, height: mark.height }}
+            transition={GLIDE}
+          />
+        )}
         {NAV_GROUPS.filter((g) => !offline || !g.sections.some((x) => NODE_SECTIONS.has(x))).map((group, gi) => (
           <div key={group.title} className="flex flex-col gap-px">
             <h3 className={`px-2.5 pb-1 text-xs font-semibold text-muted-foreground ${gi === 0 ? "" : "pt-5"}`}>
@@ -421,14 +431,6 @@ export default function Settings() {
                     section === id ? "font-medium" : "text-foreground/80"
                   }`}
                 >
-                  {section === id && (
-                    <motion.span
-                      layoutId="settings-selection"
-                      layoutDependency={section}
-                      transition={GLIDE}
-                      className="absolute inset-0 rounded-lg bg-selected"
-                    />
-                  )}
                   <span className="relative flex items-center gap-2">
                     <SectionTile id={id} small />
                     {t(`settings.section.${id}`)}
@@ -1720,15 +1722,14 @@ export default function Settings() {
           dirty={dirty}
           saved={saved}
           dirtyNeedsRestart={dirtyNeedsRestart || dirtyNeedsAppRestart}
-          restartPending={appRestartPending ? "app" : restartPending ? "node" : null}
-          restarting={restarting}
-          restartWaiting={appRestartPending ? null : torWaiting}
+          appRestartPending={appRestartPending}
+          restarting={appRestarting}
           onSave={save}
           onDiscard={() => {
             setCfg(orig);
             setErr(null);
           }}
-          onRestart={appRestartPending ? restartApp : restartNode}
+          onRestart={restartApp}
         />
       </div>
     </div>
@@ -2107,9 +2108,8 @@ function SaveBar({
   dirty,
   saved,
   dirtyNeedsRestart,
-  restartPending,
+  appRestartPending,
   restarting,
-  restartWaiting,
   onSave,
   onDiscard,
   onRestart,
@@ -2117,17 +2117,16 @@ function SaveBar({
   dirty: boolean;
   saved: boolean;
   dirtyNeedsRestart: boolean;
-  restartPending: "node" | "app" | null;
+  /** The app waits on a restart for a saved change. The node's, the node bar asks for. */
+  appRestartPending: boolean;
   restarting: boolean;
-  /** Why the node can't restart yet (Tor still connecting), shown on its button, disabled. */
-  restartWaiting: string | null;
   onSave: () => void;
   onDiscard: () => void;
   onRestart: () => void;
 }) {
   const t = useT();
-  const visible = dirty || saved || !!restartPending;
-  const kind = dirty ? "dirty" : restartPending ? `restart-${restartPending}` : "saved";
+  const visible = dirty || saved || appRestartPending;
+  const kind = dirty ? "dirty" : appRestartPending ? "restart-app" : "saved";
   // A footer along the pane, as a preferences window's Apply/Revert row: it
   // slides up while there is something to apply, its message swapping in place
   return (
@@ -2164,28 +2163,15 @@ function SaveBar({
                     {t("common.save")}
                   </button>
                 </>
-              ) : restartPending ? (
+              ) : appRestartPending ? (
                 <>
                   <span className="flex flex-1 items-center gap-2">
                     <Indicator grade="warn" />
-                    {restartPending === "app"
-                      ? t("settings.save.appRestartRequired")
-                      : t("settings.save.restartRequired")}
+                    {t("settings.save.appRestartRequired")}
                   </span>
-                  <button
-                    type="button"
-                    onClick={onRestart}
-                    disabled={restarting || !!restartWaiting}
-                    className="btn btn-primary"
-                  >
-                    {(restarting || restartWaiting) && <Loader2 className="size-3.5 animate-spin" />}
-                    {restarting
-                      ? t("settings.save.restarting")
-                      : restartWaiting
-                        ? restartWaiting
-                        : restartPending === "app"
-                          ? t("settings.save.restartApp")
-                          : t("settings.save.restart")}
+                  <button type="button" onClick={onRestart} disabled={restarting} className="btn btn-primary">
+                    {restarting && <Loader2 className="size-3.5 animate-spin" />}
+                    {restarting ? t("settings.save.restarting") : t("settings.save.restartApp")}
                   </button>
                 </>
               ) : (

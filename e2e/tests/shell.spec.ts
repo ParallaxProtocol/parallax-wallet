@@ -162,7 +162,7 @@ test("the node's page offers to connect while the node is off", async ({ page })
   await expect(bar.getByText("Peers", { exact: true }).first()).toBeVisible({ timeout: 60_000 });
 });
 
-test("with Tor off, no Tor bar shows", async ({ page }) => {
+test("with Tor off, the node bar shows nothing of Tor", async ({ page }) => {
   await expect(title(page, "Overview")).toBeVisible();
   await expect(page.getByText(/Connect(ed|ing) (through|to) Tor/)).toHaveCount(0);
   await expect(page.getByText("Tor isn't connected: nothing goes out")).toHaveCount(0);
