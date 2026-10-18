@@ -19,9 +19,9 @@ export const SETTINGS_SECTIONS = [
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
 
 /**
- * The pages a section drills into, in place of the section. Finding a
- * phrase's accounts carries the password that opened it and the accounts
- * first read, for as long as the page shows.
+ * The pages a section drills into, in place of the section. None carries
+ * a secret: finding a phrase's accounts carries the phrase's ID alone, the
+ * backend reading them with the unlocked wallet's key (WalletScanWalletSeed).
  */
 export type SettingsPage =
   | { kind: "accounts.add" }
