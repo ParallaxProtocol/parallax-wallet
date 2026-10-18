@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { test, expect, answerDialogs, call, nodeRunning, PASSWORD, configDir } from "../fixtures";
+import { test, expect, answerDialogs, call, nodeRunning, PASSWORD, configDir, FUNDED, OTHER } from "../fixtures";
+import { balance, LAX, sendRaw } from "./helpers/wallet";
 import { config, openSettings, row, savedAs, sheet } from "./helpers/settings";
 
 test("Storage shows where the wallet and the node keep their data", async ({ page, home }) => {
@@ -17,8 +18,16 @@ test("Storage shows where the wallet and the node keep their data", async ({ pag
   await expect(sheet(page).getByRole("heading", { level: 3, name: "Danger zone" })).toBeVisible();
 });
 
-test("the node's data moves to a folder picked, and the data directory says where", async ({ app, page, home }) => {
-  await nodeRunning(page);
+test("the node's data moves to a folder picked, its chain with it, and the data directory says where", async ({
+  app,
+  page,
+  home,
+}) => {
+  // A block made first: the chain moved must still have it, that block itself (the wallet sends again
+  // what it hasn't seen in a block, so a new chain could have the transaction, in a block of its own)
+  await sendRaw(page, FUNDED.address, OTHER.address, 3n);
+  await expect.poll(async () => (await call<{ currentBlock: number }>(page, "NodeStatus")).currentBlock).toBe(1);
+  const [block] = await call<{ number: number; hash: string }[]>(page, "RecentBlocks", 1);
   const to = path.join(home, "moved");
   fs.mkdirSync(to);
   await answerDialogs(app, to);
@@ -33,6 +42,12 @@ test("the node's data moves to a folder picked, and the data directory says wher
 
   await savedAs(page, "dataDir", to);
   await expect(sheet(page).getByRole("button", { name: `Data directory: ${to}` })).toBeVisible();
+  await nodeRunning(page);
+  expect(await call<{ number: number; hash: string }[]>(page, "RecentBlocks", 1)).toMatchObject([block]);
+  expect(await balance(page, OTHER.address)).toBe(3n * LAX);
+  // The development chain's own folder, beside the data directory, went with it: nothing left behind
+  expect(fs.existsSync(path.join(home, ".parallax-dev"))).toBe(false);
+  expect(fs.existsSync(`${to}-dev`)).toBe(true);
 });
 
 test("a cancelled folder pick moves nothing", async ({ app, page, home }) => {

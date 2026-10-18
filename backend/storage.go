@@ -368,6 +368,17 @@ func (n *NodeController) MoveDataDir(ctx context.Context, chosen string, progres
 		if err := moveTree(src, d, progress); err != nil {
 			return err
 		}
+		// The development chain keeps its own folder beside the data
+		// directory (nodeDataDir): it goes along, where the moved one will
+		// look for it, or the move is undone
+		if devChain(g) {
+			if err := moveTree(src+"-dev", d+"-dev", progress); err != nil {
+				if undo := moveTree(d, src, nil); undo != nil {
+					return fmt.Errorf("%w (and moving the data back: %v)", err, undo)
+				}
+				return err
+			}
+		}
 		if filepath.IsAbs(g.AncientDir) && within(g.AncientDir, src) {
 			rel, _ := filepath.Rel(src, g.AncientDir)
 			g.AncientDir = filepath.Join(d, rel)

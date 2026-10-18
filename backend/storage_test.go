@@ -4,6 +4,7 @@
 package backend
 
 import (
+	"context"
 	"errors"
 	"os"
 	"path/filepath"
@@ -199,5 +200,83 @@ func TestWalletWipe(t *testing.T) {
 	// As on a first launch: a password can be set again
 	if err := w.SetupPassword(testPassword); err != nil {
 		t.Errorf("SetupPassword after Wipe: %v", err)
+	}
+}
+
+// newDevController is a node controller, its node not running, on the
+// development chain with its data in root/data and the chain's own folder
+// beside it (nodeDataDir).
+func newDevController(t *testing.T, root string) (*NodeController, *ConfigStore) {
+	t.Helper()
+	t.Setenv("PARALLAX_DEV", "1")
+	cfg, err := LoadConfigStore(filepath.Join(root, "config", "gui.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := cfg.Get()
+	g.DataDir = filepath.Join(root, "data")
+	g.DevChain = true
+	if err := cfg.Save(g); err != nil {
+		t.Fatal(err)
+	}
+	writeFile(t, filepath.Join(root, "data", "nodekey"), "key")
+	writeFile(t, filepath.Join(root, "data-dev", "default", "chaindata", "000001.ldb"), "dev blocks")
+	return NewNodeController(cfg), cfg
+}
+
+// The development chain's own folder goes with the data directory, where
+// the moved one looks for it: its chain kept, nothing left behind.
+func TestMoveDataDirTakesTheDevChain(t *testing.T) {
+	root := t.TempDir()
+	n, cfg := newDevController(t, root)
+	to := filepath.Join(root, "moved")
+	if err := os.Mkdir(to, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	dest, err := n.MoveDataDir(context.Background(), to, nil)
+	if err != nil {
+		t.Fatalf("MoveDataDir: %v", err)
+	}
+	if dest != to || cfg.Get().DataDir != to {
+		t.Errorf("moved to %q, config says %q, want %q", dest, cfg.Get().DataDir, to)
+	}
+	if b, err := os.ReadFile(filepath.Join(to+"-dev", "default", "chaindata", "000001.ldb")); err != nil || string(b) != "dev blocks" {
+		t.Errorf("the development chain moved = %q, %v", b, err)
+	}
+	if got := nodeDataDir(cfg.Get()); got != filepath.Join(to+"-dev", "default") {
+		t.Errorf("the node would look in %q", got)
+	}
+	for _, left := range []string{"data", "data-dev"} {
+		if _, err := os.Stat(filepath.Join(root, left)); !os.IsNotExist(err) {
+			t.Errorf("%s left behind: %v", left, err)
+		}
+	}
+}
+
+// If the development chain's folder can't follow, the data directory comes
+// back: nothing is left half moved, and the config is as it was.
+func TestMoveDataDirUndoneIfTheDevChainCantFollow(t *testing.T) {
+	root := t.TempDir()
+	n, cfg := newDevController(t, root)
+	to := filepath.Join(root, "moved")
+	if err := os.Mkdir(to, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	// Something already where the chain's folder would go
+	writeFile(t, filepath.Join(to+"-dev", "someone else's"), "kept")
+	if _, err := n.MoveDataDir(context.Background(), to, nil); err == nil {
+		t.Fatal("MoveDataDir moved over another folder")
+	}
+	if cfg.Get().DataDir != filepath.Join(root, "data") {
+		t.Errorf("config says %q", cfg.Get().DataDir)
+	}
+	if b, err := os.ReadFile(filepath.Join(root, "data", "nodekey")); err != nil || string(b) != "key" {
+		t.Errorf("the data directory came back as %q, %v", b, err)
+	}
+	if b, err := os.ReadFile(filepath.Join(root, "data-dev", "default", "chaindata", "000001.ldb")); err != nil || string(b) != "dev blocks" {
+		t.Errorf("the development chain = %q, %v", b, err)
+	}
+	if b, err := os.ReadFile(filepath.Join(to+"-dev", "someone else's")); err != nil || string(b) != "kept" {
+		t.Errorf("the other folder = %q, %v", b, err)
 	}
 }
