@@ -50,7 +50,7 @@ run(
     "build",
     "-ldflags",
     // The development features, which PARALLAX_DEV turns on in a build made for them (backend/devchain.go)
-    `-X github.com/ParallaxProtocol/parallax-gui/backend.DaemonCommit=${daemonCommit} -X github.com/ParallaxProtocol/parallax-gui/backend.devFeatures=on`,
+    `-X github.com/ParallaxProtocol/parallax-wallet/backend.DaemonCommit=${daemonCommit} -X github.com/ParallaxProtocol/parallax-wallet/backend.devFeatures=on`,
     "-o",
     bin,
     ".",

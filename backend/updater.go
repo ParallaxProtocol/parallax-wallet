@@ -26,9 +26,9 @@ import (
 )
 
 const (
-	guiReleasesAPI = "https://api.github.com/repos/ParallaxProtocol/parallax-gui/releases/latest"
+	guiReleasesAPI = "https://api.github.com/repos/ParallaxProtocol/parallax-wallet/releases/latest"
 	// guiReleaseListAPI lists the releases, newest first, for their notes
-	guiReleaseListAPI = "https://api.github.com/repos/ParallaxProtocol/parallax-gui/releases?per_page=100"
+	guiReleaseListAPI = "https://api.github.com/repos/ParallaxProtocol/parallax-wallet/releases?per_page=100"
 	checkCooldown     = 5 * time.Minute // minimum interval between checks
 )
 

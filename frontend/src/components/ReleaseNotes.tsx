@@ -10,7 +10,7 @@ import { Notice } from "./ui/bits";
 import { SPRING } from "../lib/motion";
 
 /** Where every release's page is, for the notes the app can't read. */
-const RELEASES_URL = "https://github.com/ParallaxProtocol/parallax-gui/releases";
+const RELEASES_URL = "https://github.com/ParallaxProtocol/parallax-wallet/releases";
 
 /** Releases About's notes leave out: the first release's, which has nothing to say of the app since. */
 const HIDDEN_RELEASES = new Set(["1.0.0"]);

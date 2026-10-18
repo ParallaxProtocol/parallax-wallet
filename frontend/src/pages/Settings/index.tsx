@@ -2104,7 +2104,7 @@ function About() {
 }
 
 // Where the app's strings live, for anyone who'd fix one or add a language
-const TRANSLATIONS_URL = "https://github.com/ParallaxProtocol/parallax-gui/tree/main/frontend/src/i18n";
+const TRANSLATIONS_URL = "https://github.com/ParallaxProtocol/parallax-wallet/tree/main/frontend/src/i18n";
 
 /**
  * issueURL opens one of the repository's issue forms, its fields filled in
@@ -2113,7 +2113,7 @@ const TRANSLATIONS_URL = "https://github.com/ParallaxProtocol/parallax-gui/tree/
 function issueURL(template: string, fields: Record<string, string> = {}) {
   const q = new URLSearchParams({ template });
   for (const [k, v] of Object.entries(fields)) if (v) q.set(k, v);
-  return `https://github.com/ParallaxProtocol/parallax-gui/issues/new?${q}`;
+  return `https://github.com/ParallaxProtocol/parallax-wallet/issues/new?${q}`;
 }
 
 // The computer, as the problem form's "Your computer" names it

@@ -105,7 +105,7 @@ jobs:
       - name: Upload GUI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: parallax-gui-${{ matrix.display_os }}-${{ matrix.display_arch }}
+          name: parallax-wallet-${{ matrix.display_os }}-${{ matrix.display_arch }}
           path: |
             build/package/Parallax-Wallet-*
             !build/package/*.blockmap

@@ -83,7 +83,7 @@ test("About's links open in the browser, a problem's report with the version and
   const [site, bug, feature] = await opened();
   expect(site).toBe("https://parallaxprotocol.org/");
   const report = new URL(bug);
-  expect(report.pathname).toBe("/ParallaxProtocol/parallax-gui/issues/new");
+  expect(report.pathname).toBe("/ParallaxProtocol/parallax-wallet/issues/new");
   expect(report.searchParams.get("template")).toBe("bug_report.yml");
   // The system the report is about, as the app names it
   expect(report.searchParams.get("os")).toBe(

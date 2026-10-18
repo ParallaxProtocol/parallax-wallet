@@ -16,7 +16,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/ParallaxProtocol/parallax-gui/backend"
+	"github.com/ParallaxProtocol/parallax-wallet/backend"
 
 	// Side-effect imports — register the JS and native tracer factories
 	// so debug_traceTransaction / debug_traceCall and friends actually

@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ParallaxProtocol/parallax-gui/backend"
+	"github.com/ParallaxProtocol/parallax-wallet/backend"
 	"github.com/ParallaxProtocol/parallax/v2/logging"
 	"github.com/ParallaxProtocol/parallax/v2/support/metrics"
 	"github.com/ParallaxProtocol/parallax/v2/support/metrics/exp"

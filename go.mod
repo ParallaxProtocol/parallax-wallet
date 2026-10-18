@@ -1,4 +1,4 @@
-module github.com/ParallaxProtocol/parallax-gui
+module github.com/ParallaxProtocol/parallax-wallet
 
 go 1.27.0
 

@@ -141,7 +141,7 @@ func (l *LogTail) Tail(n int) []LogLine {
 
 // appPackages is the prefix of this app's own Go packages, as a call
 // site's function names them; anything else logged is the node's.
-const appPackages = "github.com/ParallaxProtocol/parallax-gui"
+const appPackages = "github.com/ParallaxProtocol/parallax-wallet"
 
 // recordSource tells the app's own lines from the node's, by where the
 // record was logged.

@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ParallaxProtocol/parallax-gui/backend/internal/taskport"
+	"github.com/ParallaxProtocol/parallax-wallet/backend/internal/taskport"
 )
 
 // signedChild is set in the processes TestHardenedRuntime starts, signed
