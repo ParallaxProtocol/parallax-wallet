@@ -127,7 +127,7 @@ export default function UpdateModal({ open, onClose }: { open: boolean; onClose:
         </div>
       }
     >
-      {/* Each release's notes, newest first */}
+      {/* Each release's notes, newest first: all of them open, as they're what the update brings */}
       <ReleaseNotesList releases={releases} />
     </Modal>
   );
