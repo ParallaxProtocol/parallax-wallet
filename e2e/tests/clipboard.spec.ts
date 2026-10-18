@@ -11,7 +11,10 @@ import { openSettings } from "./helpers/accounts";
 
 const PHRASE = "test test test test test test test test test test test junk";
 
-const clipboard = (app: ElectronApplication) => app.evaluate(({ clipboard }) => clipboard.readText());
+// As written: Windows' clipboard ends its lines \r\n, which would make a check that it no longer holds
+// what was pasted pass whether it was cleared or not
+const clipboard = async (app: ElectronApplication) =>
+  (await app.evaluate(({ clipboard }) => clipboard.readText())).replace(/\r\n/g, "\n");
 const copy = (app: ElectronApplication, text: string) =>
   app.evaluate(({ clipboard }, t) => clipboard.writeText(t), text);
 

@@ -303,7 +303,10 @@ export async function refresh(page: Page) {
  * asynchronously, and apps running side by side share the one clipboard.
  */
 export async function expectClipboard(app: ElectronApplication, text: string) {
-  await expect.poll(() => app.evaluate(({ clipboard }) => clipboard.readText())).toBe(text);
+  // Windows' clipboard ends its lines \r\n, as Windows' apps take them
+  await expect
+    .poll(async () => (await app.evaluate(({ clipboard }) => clipboard.readText())).replace(/\r\n/g, "\n"))
+    .toBe(text);
 }
 
 /**
