@@ -15,4 +15,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   // A failed test's trace and screenshot are kept by the fixture (Electron isn't a browser Playwright's `use` reaches)
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : [["list"]],
+  projects: [
+    { name: "app", testIgnore: /clipboard\.spec\.ts$/ },
+    // What the clipboard holds is the desktop's, shared by every app running: the tests of
+    // what's cleared from it run once the others are done, one after another
+    { name: "clipboard", testMatch: /clipboard\.spec\.ts$/, dependencies: ["app"], fullyParallel: false },
+  ],
 });

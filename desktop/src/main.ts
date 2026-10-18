@@ -1,10 +1,12 @@
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import {
   app,
   BrowserWindow,
+  clipboard,
   dialog,
   ipcMain,
   IpcMainEvent,
@@ -181,6 +183,17 @@ function backendArgs(): string[] {
   } catch {
     return ["--metrics"]; // no config yet: a fresh install
   }
+}
+
+/**
+ * secretHash is what clearClipboardIf compares (preload.ts makes the same):
+ * SHA-256 of the text trimmed, its spaces single, lower-cased and without
+ * a leading 0x, so a phrase or key pasted with a newline after, or a key
+ * with its 0x, is the one imported.
+ */
+function secretHash(text: string): string {
+  const normal = text.trim().replace(/\s+/g, " ").toLowerCase().replace(/^0x/, "");
+  return createHash("sha256").update(normal).digest("hex");
 }
 
 /** Only the app's own pages may use the bridge. */
@@ -556,6 +569,16 @@ function wireIpc() {
   });
   ipcMain.handle("shell:openExternal", (event, url: unknown) => {
     if (trusted(event) && typeof url === "string") openExternal(url);
+  });
+  // A secret just imported from what was pasted leaves the clipboard: it's
+  // cleared if it still holds it, told by the secret's hash only
+  // (preload.ts clearClipboardIf), so the secret itself never reaches here
+  ipcMain.handle("clipboard:clearIf", async (event, hashes: unknown) => {
+    if (!trusted(event) || !Array.isArray(hashes) || !hashes.every((h) => typeof h === "string")) return false;
+    const held = await clipboard.readText();
+    if (!held || !hashes.includes(secretHash(held))) return false;
+    await clipboard.clear();
+    return true;
   });
   // Windows Security's Core isolation page, for Settings' Security's
   // Memory integrity row: this one address only, not one the page names

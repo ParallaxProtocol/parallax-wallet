@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { FileKey2, Loader2, TriangleAlert } from "lucide-react";
 import { api, SeedCandidate, SeedScheme, walletError } from "../../../lib/api";
 import { useWallet } from "../../../lib/wallet";
+import { forgetPasted } from "../../../lib/desktop";
 import { useT } from "../../../i18n";
 import { Notice } from "../../../components/ui/bits";
 import { Panel, Row, Rows } from "../../../components/ui/Panel";
@@ -82,6 +83,7 @@ export function ImportKey({ lead, onBack, onDone }: { lead: string; onBack: () =
               : api.walletImportKeyfile(defaultName, file!.json, filePassword),
           );
           if (acc) {
+            forgetPasted(key, filePassword);
             await wallet.refresh();
             onDone();
           }
@@ -306,6 +308,7 @@ export function PhraseImport({ lead, onBack, onDone }: { lead: string; onBack: (
             onClick={async () => {
               const acc = await run(() => api.walletImportSeed("", words, pass, namePicks(picks, "")));
               if (acc) {
+                forgetPasted(words, pass);
                 setWords("");
                 await wallet.refresh();
                 onDone();

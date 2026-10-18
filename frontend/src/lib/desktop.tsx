@@ -30,6 +30,16 @@ export function useHiddenFromCapture(on = true) {
   }, [on]);
 }
 
+/**
+ * forgetPasted clears the clipboard if it still holds one of these secrets,
+ * once they're imported: a key or a phrase pasted in shouldn't stay there
+ * for whatever reads the clipboard next. Only their hashes leave the
+ * window's process (desktop/src/preload.ts clearClipboardIf).
+ */
+export function forgetPasted(...secrets: string[]) {
+  void window.parallax?.clearClipboardIf?.(...secrets).catch(() => {});
+}
+
 /** notify shows a desktop notification; clicked, it brings the window forward, and runs onClick if given. */
 export function notify(title: string, body: string, onClick?: () => void) {
   if (typeof Notification === "undefined" || Notification.permission === "denied") return;

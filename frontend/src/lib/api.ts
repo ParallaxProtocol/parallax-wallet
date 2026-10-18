@@ -11,6 +11,7 @@ declare global {
       setTheme: (pref: "system" | "light" | "dark") => void;
       security: () => Promise<WindowSecurity>;
       openCoreIsolation: () => void;
+      clearClipboardIf: (...secrets: string[]) => Promise<boolean>;
       loginItem: () => Promise<{ supported: boolean; enabled: boolean }>;
       setLoginItem: (on: boolean) => Promise<void>;
       keepAwake: (on: boolean) => void;

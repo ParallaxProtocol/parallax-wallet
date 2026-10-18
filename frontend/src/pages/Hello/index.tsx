@@ -19,6 +19,7 @@ import { EASE, Glow } from "../../components/ui/Glow";
 import { useAnimationsOff } from "../../lib/prefs";
 import { SPRING } from "../../lib/motion";
 import { setSetupPending } from "../../lib/walletSetup";
+import { forgetPasted } from "../../lib/desktop";
 import { useOfflineMode } from "../../lib/offline";
 import { Lang, useLang, useT } from "../../i18n";
 import { LANG_NAMES } from "../../i18n/translations";
@@ -1160,6 +1161,7 @@ function ImportAccounts({
             setError(null);
             try {
               await api.walletImportSeed("", words, passphrase, namePicks(picks, ""));
+              forgetPasted(words, passphrase);
               onImported();
             } catch (e) {
               setError(walletError(e, t));

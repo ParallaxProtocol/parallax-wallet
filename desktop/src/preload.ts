@@ -134,6 +134,23 @@ contextBridge.exposeInMainWorld("parallax", {
       packaged: (await ipcRenderer.invoke("security:packaged")) === true,
     };
   },
+  /**
+   * Clears the clipboard if it still holds one of these secrets, just
+   * imported from what was pasted; whether it did. Only their hashes
+   * leave this process (main.ts secretHash makes the same).
+   */
+  async clearClipboardIf(...secrets: string[]): Promise<boolean> {
+    const hashes: string[] = [];
+    for (const secret of secrets) {
+      const normal = secret.trim().replace(/\s+/g, " ").toLowerCase().replace(/^0x/, "");
+      if (!normal) continue;
+      const bytes = text.encode(normal);
+      const digest = new Uint8Array(await subtle.digest("SHA-256", bytes));
+      bytes.fill(0);
+      hashes.push(Array.from(digest, (b) => b.toString(16).padStart(2, "0")).join(""));
+    }
+    return hashes.length > 0 && (await ipcRenderer.invoke("clipboard:clearIf", hashes)) === true;
+  },
   /** Opens Windows Security at Core isolation, where Memory integrity is turned on (Windows). */
   openCoreIsolation() {
     ipcRenderer.send("security:openCoreIsolation");
