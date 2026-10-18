@@ -252,15 +252,16 @@ export async function answerDialogs(app: ElectronApplication, file: string | nul
 
 /** Waits for the node to be running and to have made its first blocks (the development chain seals on demand). */
 export async function nodeRunning(page: Page) {
-  await expect
-    .poll(
-      async () =>
-        (await call<{ running?: boolean }>(page, "NodeStatus").catch(() => ({}) as { running?: boolean })).running,
-      {
-        timeout: 60_000,
-      },
-    )
-    .toBe(true);
+  type Status = { running?: boolean; startError?: string };
+  const deadline = Date.now() + 60_000;
+  for (;;) {
+    const st = await call<Status>(page, "NodeStatus").catch(() => ({}) as Status);
+    if (st.running) return;
+    // A start that failed says why at once, rather than leave the test to wait out the minute
+    if (st.startError) throw new Error(`the node didn't start: ${st.startError}`);
+    if (Date.now() > deadline) throw new Error("the node didn't start within 60s");
+    await new Promise((r) => setTimeout(r, 250));
+  }
 }
 
 /** Opens a page from the sidebar by its name ("Send", "Contacts", "Settings"…). */

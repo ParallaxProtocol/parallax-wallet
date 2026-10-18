@@ -13,6 +13,8 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   retries: process.env.CI ? 1 : 0,
   forbidOnly: !!process.env.CI,
+  // A run that breaks everywhere says so in its first failures: CI stops there, rather than wait out every test
+  maxFailures: process.env.CI ? 10 : 0,
   // A failed test's trace and screenshot are kept by the fixture (Electron isn't a browser Playwright's `use` reaches)
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : [["list"]],
   projects: [

@@ -85,7 +85,10 @@ test("About's links open in the browser, a problem's report with the version and
   const report = new URL(bug);
   expect(report.pathname).toBe("/ParallaxProtocol/parallax-gui/issues/new");
   expect(report.searchParams.get("template")).toBe("bug_report.yml");
-  expect(report.searchParams.get("os")).toBe("Linux");
+  // The system the report is about, as the app names it
+  expect(report.searchParams.get("os")).toBe(
+    { linux: "Linux", darwin: "macOS", win32: "Windows" }[process.platform as string],
+  );
   expect(report.searchParams.get("version")).toMatch(/^\d+\.\d+\.\d+/);
   expect(new URL(feature).searchParams.get("template")).toBe("feature_request.yml");
 });
