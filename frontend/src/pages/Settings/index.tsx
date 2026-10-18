@@ -1954,7 +1954,7 @@ function About() {
       <div className="flex flex-col items-center gap-3 pt-2 text-center">
         <LogoMark size={80} />
         <div className="flex flex-col gap-1">
-          <h3 className="text-2xl font-semibold tracking-tight">{appName}</h3>
+          <h3 className="font-brand text-2xl font-semibold tracking-tight">{appName}</h3>
           {appNumber && (
             <span className="selectable text-muted-foreground">
               {t("settings.about.version", { version: appNumber })}

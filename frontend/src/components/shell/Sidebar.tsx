@@ -67,9 +67,12 @@ const fade = (shown: boolean) => ({
  * narrows to a rail of its icons, their names in tooltips, the page
  * gliding over to take the room.
  */
-// The logo and name over the sidebar, in the website's proportions: the
-// mark half the title bar's height, the name set tight beside it
+// The logo and name over the sidebar, as the website's header sets them
+// (its 32px mark, its name in Geist at 30px, 12px apart): the mark half the
+// title bar's height, the name and the gap to it in the same proportion
 const LOGO = 26;
+const NAME_SIZE = (LOGO * 30) / 32;
+const NAME_GAP = (LOGO * 12) / 32;
 
 export default function Sidebar() {
   const t = useT();
@@ -92,15 +95,20 @@ export default function Sidebar() {
           under the page's part, and the sidebar's own line starts below it.
           On macOS, under the traffic lights' row. In the rail, the logo alone */}
       <motion.div
-        className="drag flex shrink-0 items-center gap-2.5 overflow-hidden border-b border-border pr-4 whitespace-nowrap"
+        className="drag flex shrink-0 items-center overflow-hidden border-b border-border pr-4 whitespace-nowrap"
         initial={false}
-        style={{ height: TOP_BAR_HEIGHT, paddingTop: TRAFFIC_LIGHTS_ROW }}
+        style={{ height: TOP_BAR_HEIGHT, paddingTop: TRAFFIC_LIGHTS_ROW, gap: NAME_GAP }}
         animate={{ paddingLeft: collapsed ? (RAIL - LOGO) / 2 : 16 }}
         transition={SPRING}
       >
         <LogoMark size={LOGO} />
         <motion.span className="flex min-w-0 items-center gap-2.5" initial={false} animate={fade(!collapsed)}>
-          <span className="truncate text-[19px] leading-none font-medium tracking-[-0.04em]">Parallax Wallet</span>
+          <span
+            className="truncate font-brand leading-none font-medium tracking-[-0.04em]"
+            style={{ fontSize: NAME_SIZE }}
+          >
+            Parallax Wallet
+          </span>
           <ProfileBadge />
         </motion.span>
       </motion.div>

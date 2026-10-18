@@ -295,7 +295,8 @@ function LockScreen({ shutting }: { shutting: boolean }) {
               <AnimatePresence mode="wait">
                 <motion.h1
                   key={locked ? "locked" : "name"}
-                  className="bg-gradient-to-br from-foreground via-foreground to-[var(--app-brand)] bg-clip-text px-2 pb-1 text-center text-5xl font-semibold tracking-tight text-transparent"
+                  // The app's name in the website's face, as the sidebar's; the lock's titles in the app's
+                  className={`bg-gradient-to-br from-foreground via-foreground to-[var(--app-brand)] bg-clip-text px-2 pb-1 text-center text-5xl font-semibold tracking-tight text-transparent ${locked ? "" : "font-brand"}`}
                   initial={{ opacity: 0, y: settled.current ? 14 : 24, filter: "blur(10px)" }}
                   animate={{
                     opacity: 1,

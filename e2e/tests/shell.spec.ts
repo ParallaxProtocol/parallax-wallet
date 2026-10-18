@@ -19,6 +19,25 @@ test("every sidebar link opens its page", async ({ page }) => {
   }
 });
 
+test("the app's name is set in Geist, its font files the app's own, none fetched from the internet", async ({
+  page,
+}) => {
+  await expect(page.getByText("Parallax Wallet", { exact: true }).first()).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => document.fonts.check('500 24px "Geist Variable"', "Parallax Wallet")))
+    .toBe(true);
+  // Each one's address, and whether it's under the app's own (app://parallax/assets/...)
+  const fonts = await page.evaluate(() =>
+    performance
+      .getEntriesByType("resource")
+      .map((e) => e.name)
+      .filter((u) => /\.(woff2?|ttf|otf)(\?|$)/.test(u))
+      .map((u) => ({ u, own: u.startsWith(`${location.protocol}//${location.host}/`) })),
+  );
+  expect(fonts.length).toBeGreaterThan(0);
+  for (const f of fonts) expect(f, f.u).toMatchObject({ own: true });
+});
+
 test("the sidebar's Settings opens Settings", async ({ page }) => {
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   const settings = page.getByRole("region", { name: "Settings" });

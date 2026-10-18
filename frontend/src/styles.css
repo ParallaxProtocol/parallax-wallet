@@ -221,6 +221,8 @@ button.glass:hover,
   --font-sans:
     -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", "Geist Variable", system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Geist Mono Variable", monospace;
+  /* The app's name beside its mark, in the website's face on every system */
+  --font-brand: "Geist Variable", sans-serif;
 
   /* Desktop type sizes: 13px body, 12px secondary, 11px captions */
   --text-xs: 11px;
