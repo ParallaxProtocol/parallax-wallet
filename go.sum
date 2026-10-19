@@ -1,6 +1,6 @@
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
-github.com/ParallaxProtocol/parallax-mcp v0.2.2 h1:uTbi16pE0GarO8KpYEtrMn2P5ROi3uoiBiClVynf2e4=
-github.com/ParallaxProtocol/parallax-mcp v0.2.2/go.mod h1:7CyJqog0UfWNVNZGmLPmmKLLVXsLE+S9p/g+iVQJb5k=
+github.com/ParallaxProtocol/parallax-mcp v0.2.4 h1:HdCxMT2U+xhc0q2ggGkRHNjLkqX5QC9XZxhO/YIbwT0=
+github.com/ParallaxProtocol/parallax-mcp v0.2.4/go.mod h1:7CyJqog0UfWNVNZGmLPmmKLLVXsLE+S9p/g+iVQJb5k=
 github.com/ParallaxProtocol/parallax/v2 v2.1.5 h1:OhXehITmK8ua8i0RUcNW4WrjmTeaGow7IH0hCjSHxhU=
 github.com/ParallaxProtocol/parallax/v2 v2.1.5/go.mod h1:rLhOIb2MKulfO5tPbvD3c6mrwo3mr8JZAITP/pxI8x0=
 github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 h1:fLjPD/aNc3UIOA6tDi6QXUemppXK3P9BI7mr2hd6gx8=
