@@ -140,6 +140,8 @@ export default function AssistantBar() {
           exit={{ opacity: 0, y: 16, scale: 0.88 }}
           transition={BAR_SPRING}
           ref={section}
+          // At the foot beside the node bar: a click on it isn't one away from the node's page
+          data-foot-bar=""
           aria-hidden={pushed || undefined}
           onMouseEnter={() => hover(true)}
           onMouseLeave={() => hover(false)}

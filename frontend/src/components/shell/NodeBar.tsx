@@ -14,13 +14,14 @@ import { api } from "../../lib/api";
 import { formatDuration, formatInt } from "../../lib/format";
 import { nodeState, syncProgress, useNode, useRefresh } from "../../lib/live";
 import { useT } from "../../i18n";
-import { NodeSheetContext, useNodeSheet } from "../../lib/nodeSheet";
+import { NodeSheetContext, useNodeSheet, type Foot } from "../../lib/nodeSheet";
 import { Indicator, type Grade } from "../ui/Indicator";
 import { Meter } from "../ui/bits";
 import { Counter } from "../ui/Counter";
 import { Tooltip } from "../ui/Tooltip";
 import { TOP_BAR_HEIGHT } from "./TopBar";
 import { useAssistant } from "../../lib/assistantContext";
+import { useSettingsSheet } from "../../lib/settingsSheet";
 import { NodeSwitchContext, useNodeSwitch } from "../../lib/nodeSwitch";
 import { BAR_FADE, BAR_GLASS, BAR_SURFACE } from "./barSurface";
 import { torBarKind, useTorStatus } from "../../lib/torStatus";
@@ -44,8 +45,8 @@ export const NODE_BAR_ROOM = NODE_BAR_HEIGHT + 2 * NODE_BAR_GAP;
 
 /** The bar's spring, as it opens, closes and rises full; the assistant bar's too, so the two move as one. */
 export const BAR_SPRING = { type: "spring", bounce: 0, visualDuration: 0.35 } as const;
-/** The open panel following its page's height, a frame or two behind. */
-const FOLLOW = { type: "tween", duration: 0.12, ease: "easeOut" } as const;
+/** The open panel following its page's height, a frame or two behind; Settings following it. */
+export const FOLLOW = { type: "tween", duration: 0.12, ease: "easeOut" } as const;
 
 const STATE_GRADE: Record<ReturnType<typeof nodeState>, Grade> = {
   stopped: "off",
@@ -78,7 +79,12 @@ function Swap({ swap, className = "", children }: { swap: string; className?: st
 export function NodeSheetProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [full, setFull] = useState(false);
-  return <NodeSheetContext.Provider value={{ open, setOpen, full, setFull }}>{children}</NodeSheetContext.Provider>;
+  const [foot, setFoot] = useState<Foot | null>(null);
+  return (
+    <NodeSheetContext.Provider value={{ open, setOpen, full, setFull, foot, setFoot }}>
+      {children}
+    </NodeSheetContext.Provider>
+  );
 }
 
 export { useNodeSheet };
@@ -145,7 +151,7 @@ export function NodeSwitchProvider({ children }: { children: ReactNode }) {
 export default function NodeBar() {
   const t = useT();
   const node = useNode();
-  const { open, setOpen, full } = useNodeSheet();
+  const { open, setOpen, full, setFoot } = useNodeSheet();
   const state = nodeState(node);
   const progress = syncProgress(node);
   const running = !!node?.running;
@@ -192,7 +198,8 @@ export default function NodeBar() {
   }, [open]);
   // Under the title bar at most; the bar, the page and the panel's border (2px) otherwise
   const tallest = Math.max(NODE_BAR_HEIGHT, vh - TOP_BAR_HEIGHT - NODE_BAR_GAP);
-  const openHeight = full ? tallest : Math.min(tallest, NODE_BAR_HEIGHT + pageHeight + 2);
+  const fitHeight = Math.min(tallest, NODE_BAR_HEIGHT + pageHeight + 2);
+  const openHeight = full ? tallest : fitHeight;
   // Opening, closing and rising full take the bar's spring; otherwise the
   // panel follows the page as it grows and shrinks (a list unfolding, the
   // details folding away), close behind it rather than chasing it with a
@@ -204,6 +211,10 @@ export default function NodeBar() {
   shape.current.open = open;
   shape.current.full = full;
   const following = open && performance.now() > shape.current.springUntil;
+  // Settings keeps above the opened bar, moving as it does. Full, the bar
+  // covers it whole: it keeps to the page's height, so it comes back with
+  // the bar as the details fold away
+  useEffect(() => setFoot(open ? { height: fitHeight, following } : null), [open, fitHeight, following, setFoot]);
   // The assistant bar sits at the right end of the foot: this bar keeps
   // clear of it, moving aside as it opens on a request. Opened into the
   // node's page it takes the whole width, the assistant bar stepping
@@ -211,6 +222,25 @@ export default function NodeBar() {
   const { width: assistantWidth, shown, sent } = useAssistant();
   const asking = !!shown || !!sent;
   const right = NODE_BAR_GAP + (assistantWidth > 0 && (!open || asking) ? assistantWidth + NODE_BAR_GAP : 0);
+
+  // A click away from the opened bar closes it, unless Settings is open
+  // beside it, the two then shown together; what the page opens over the
+  // window (a dialog, a list's options) and the assistant bar beside it
+  // aren't away
+  const { open: settingsOpen } = useSettingsSheet();
+  const section = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!open || settingsOpen) return;
+    const onDown = (e: PointerEvent) => {
+      const target = e.target as Element;
+      if (section.current?.contains(target)) return;
+      if (target.closest?.("[role=dialog], [role=listbox], [data-foot-bar]")) return;
+      if (document.querySelector("[role=dialog][aria-modal=true]")) return;
+      setOpen(false);
+    };
+    window.addEventListener("pointerdown", onDown);
+    return () => window.removeEventListener("pointerdown", onDown);
+  }, [open, settingsOpen, setOpen]);
 
   useEffect(() => {
     if (!open) return;
@@ -236,6 +266,7 @@ export default function NodeBar() {
   return (
     <>
       <motion.section
+        ref={section}
         aria-label={t("nav.network")}
         // At rest the cards' glass, as the empty wallet's Settings pill, lit under the pointer as it opens on a click; opened, the page's thicker glass
         className={`no-drag fixed z-40 flex flex-col overflow-hidden ${open ? BAR_SURFACE : `${BAR_GLASS} hover:bg-[var(--glass-hover)]`} ${torOn ? "border-tor-edge" : ""} ${BAR_FADE}`}

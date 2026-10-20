@@ -6,7 +6,7 @@ import { FADE_IN, FADE_OUT } from "../../lib/motion";
 import { useSettingsSheet } from "../../lib/settingsSheet";
 import { useSidebar } from "../../lib/sidebar";
 import { Tooltip } from "../ui/Tooltip";
-import { NODE_BAR_GAP, NODE_BAR_ROOM } from "./NodeBar";
+import { BAR_SPRING, FOLLOW, NODE_BAR_GAP, NODE_BAR_HEIGHT, useNodeSheet } from "./NodeBar";
 import { TOP_BAR_HEIGHT } from "./TopBar";
 
 const Settings = lazy(() => import("../../pages/Settings"));
@@ -67,6 +67,10 @@ function SettingsTitle({ label, large, hidden }: { label: string; large?: boolea
 export default function SettingsSheet() {
   const t = useT();
   const { open, setOpen } = useSettingsSheet();
+  // Above the node bar, pushed up as it opens (none of it left as the bar
+  // fills the window), on the bar's spring or following it as it does
+  const { foot } = useNodeSheet();
+  const bottom = Math.min((foot?.height ?? NODE_BAR_HEIGHT) + 2 * NODE_BAR_GAP, window.innerHeight - TOP_BAR_HEIGHT);
 
   useEffect(() => {
     if (!open) return;
@@ -86,13 +90,17 @@ export default function SettingsSheet() {
           key="settings"
           aria-label={t("nav.settings")}
           layoutId="settings-surface"
-          transition={SETTINGS_SPRING}
+          // Grown out of its button and back, only: pushed by the node bar it
+          // moves its edge, never scaled as a layout animation would
+          layoutDependency={open}
+          initial={false}
+          animate={{ bottom }}
+          transition={{ ...SETTINGS_SPRING, bottom: foot?.following ? FOLLOW : BAR_SPRING }}
           className="no-drag fixed z-30 flex flex-col overflow-hidden border border-glass-edge bg-popover/80 shadow-[var(--glass-shine),var(--shadow-popover)] backdrop-blur-2xl"
           style={{
             top: TOP_BAR_HEIGHT,
             left: NODE_BAR_GAP,
             right: NODE_BAR_GAP,
-            bottom: NODE_BAR_ROOM,
             borderRadius: 16,
           }}
         >
