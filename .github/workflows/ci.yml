@@ -43,6 +43,11 @@ jobs:
           GOPRIVATE: github.com/ParallaxProtocol/*
         run: go vet ./...
 
+      - name: Test
+        env:
+          GOPRIVATE: github.com/ParallaxProtocol/*
+        run: go test ./... -count=1
+
       # Linux release builds turn on runtime/secret (Makefile), which
       # compiles secret_erase.go and backend/secret_test.go
       - name: Vet and test with runtime/secret
@@ -51,7 +56,7 @@ jobs:
           GOEXPERIMENT: runtimesecret
         run: |
           go vet ./...
-          go test . && go test ./backend/ -run 'TestWalletUnderRuntimeSecret|TestHardenProcess|TestNodeUsageMachineLoadIsAShare'
+          go test . && go test ./backend/ -run 'TestWalletUnderRuntimeSecret|TestHardenProcess'
 
   # The backend's hardening on Windows (backend/harden_windows.go): a
   # hardened process tried from another of the same user, as Settings'
@@ -74,8 +79,8 @@ jobs:
         env:
           GOPRIVATE: github.com/ParallaxProtocol/*
           CGO_ENABLED: "1"
-        # And the computer's CPU load as a share, Windows' ticks being 100ns (backend/usage_test.go)
-        run: go test ./backend/ -run '^(TestHardenProcess|TestMemoryIntegrity|TestIPCName|TestNodeUsageMachineLoadIsAShare)$' -count=1 -v
+        # The whole suite, the hardening's tests in it, as Windows runs it
+        run: go test ./... -count=1
 
   # The hardened runtime on macOS (backend/harden_darwin_test.go): a copy
   # signed as the app is, tried for its task port as another program would
@@ -97,8 +102,9 @@ jobs:
         env:
           GOPRIVATE: github.com/ParallaxProtocol/*
           CGO_ENABLED: "1"
+        # The whole suite as the runner's user, the hardened runtime's test in it; as root, that one
         run: |
-          go test ./backend/ -run '^(TestHardenedRuntime|TestNodeUsageMachineLoadIsAShare)$' -count=1 -v
+          go test ./... -count=1
           sudo -E env "PATH=$PATH" go test ./backend/ -run '^TestHardenedRuntime$' -count=1 -v
 
   # The whole end-to-end suite on macOS, as it runs on Linux: the real app
