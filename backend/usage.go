@@ -7,6 +7,7 @@ import (
 	"runtime"
 
 	"github.com/ParallaxProtocol/parallax/v2/support/metrics"
+	"github.com/shirou/gopsutil/cpu"
 )
 
 // Usage is what the node takes of the computer: its peer traffic and its
@@ -54,10 +55,13 @@ func NodeUsage() Usage {
 		return Usage{}
 	}
 	cores := runtime.NumCPU()
-	// The CPU gauges are hundredths of a second of CPU time per second,
-	// summed over the cores: 100 is one core kept busy
+	// The CPU gauges are clock ticks of CPU time per second, summed over the
+	// cores, in gopsutil's ticks (ReadCPUStats in v2.1.5): hundredths of a
+	// second on Linux and macOS, 100ns on Windows. The daemon counts in
+	// hundredths everywhere from the release after v2.1.5 (core 9c90354):
+	// divide by 100 with it, as TestNodeUsageMachineLoadIsAShare will say
 	share := func(name string) float64 {
-		return float64(gauge(name)) / 100 / float64(cores)
+		return float64(gauge(name)) / cpu.ClocksPerSec / float64(cores)
 	}
 	cpuSeconds, cpuCounted := processCPUSeconds()
 	// Read directly where the daemon can't, the process being non-dumpable (HardenProcess)
