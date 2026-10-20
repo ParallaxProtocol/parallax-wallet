@@ -41,16 +41,21 @@ func persisted(t *testing.T, dir string, clear bool, pub *[32]byte) *LogTail {
 	if err := tail.SealTo(pub[:]); err != nil {
 		t.Fatal(err)
 	}
-	// Its file let go of as the test ends, which the tail itself never does
-	// (Close goes on capturing): Windows removes no file still open
-	t.Cleanup(func() {
-		tail.mu.Lock()
-		defer tail.mu.Unlock()
-		if tail.file != nil {
-			tail.file.f.Close()
-		}
-	})
+	t.Cleanup(func() { endRun(tail) })
 	return tail
+}
+
+// endRun ends a tail's run as the app's process ending does: closed, its
+// file let go of, which the tail itself never does (Close goes on
+// capturing). Windows removes no file still open, which the next run's
+// clearing, and the test's own cleanup, would.
+func endRun(tail *LogTail) {
+	tail.Close()
+	tail.mu.Lock()
+	defer tail.mu.Unlock()
+	if tail.file != nil {
+		tail.file.f.Close()
+	}
 }
 
 func TestLogFileSealedAcrossRestarts(t *testing.T) {
@@ -67,7 +72,7 @@ func TestLogFileSealedAcrossRestarts(t *testing.T) {
 		t.Fatal(err)
 	}
 	first.append(LogLine{Message: "later", Source: "node"})
-	first.Close()
+	endRun(first)
 
 	raw, err := os.ReadFile(filepath.Join(dir, logFileName))
 	if err != nil || len(raw) == 0 {
@@ -105,7 +110,7 @@ func TestLogFileSealedAcrossRestarts(t *testing.T) {
 
 	// Clearing empties the tail and the file
 	second.Clear()
-	second.Close()
+	endRun(second)
 	if got := lines(second); len(got) != 0 {
 		t.Fatalf("lines after Clear = %v, want none", got)
 	}
@@ -116,7 +121,7 @@ func TestLogFileSealedAcrossRestarts(t *testing.T) {
 	// Clearing on startup starts afresh
 	third := persisted(t, dir, false, pub)
 	third.append(LogLine{Message: "kept"})
-	third.Close()
+	endRun(third)
 	fourth := persisted(t, dir, true, pub)
 	fourth.Unseal(pub, priv)
 	if got := lines(fourth); len(got) != 0 {
