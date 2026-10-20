@@ -244,13 +244,21 @@ func (lf *logFile) rotate() {
 		// What earlier runs left was in the file moved aside before
 		lf.earlierEnd = 0
 	}
+	lf.restart()
+}
+
+// restart opens the file afresh, empty, its handle closed by the caller:
+// truncating the one open isn't done, as Windows lets a file opened to
+// append be appended to only. The caller holds l.mu.
+func (lf *logFile) restart() {
+	lf.size = 0
 	f, err := os.OpenFile(lf.path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
 	if err != nil {
 		// Nowhere to write: keep the in-memory tail only
 		lf.w.Reset(io.Discard)
 		return
 	}
-	lf.f, lf.size = f, 0
+	lf.f = f
 	lf.w.Reset(f)
 }
 
@@ -263,11 +271,11 @@ func (lf *logFile) close() {
 // clear empties the file and drops the one moved aside. The caller holds l.mu.
 func (lf *logFile) clear() {
 	lf.batch = lf.batch[:0]
-	lf.w.Reset(lf.f)
-	lf.f.Truncate(0)
-	lf.f.Seek(0, io.SeekStart)
-	lf.size, lf.earlierEnd = 0, 0
+	lf.w.Reset(io.Discard)
+	lf.f.Close()
+	lf.earlierEnd = 0
 	os.Remove(lf.path + ".1")
+	lf.restart()
 }
 
 // readSealedLogFile opens the records in the last logReloadBytes of the
