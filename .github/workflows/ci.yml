@@ -51,7 +51,7 @@ jobs:
           GOEXPERIMENT: runtimesecret
         run: |
           go vet ./...
-          go test . && go test ./backend/ -run 'TestWalletUnderRuntimeSecret|TestHardenProcess'
+          go test . && go test ./backend/ -run 'TestWalletUnderRuntimeSecret|TestHardenProcess|TestNodeUsageMachineLoadIsAShare'
 
   # The backend's hardening on Windows (backend/harden_windows.go): a
   # hardened process tried from another of the same user, as Settings'
@@ -74,7 +74,8 @@ jobs:
         env:
           GOPRIVATE: github.com/ParallaxProtocol/*
           CGO_ENABLED: "1"
-        run: go test ./backend/ -run '^(TestHardenProcess|TestMemoryIntegrity|TestIPCName)$' -count=1 -v
+        # And the computer's CPU load as a share, Windows' ticks being 100ns (backend/usage_test.go)
+        run: go test ./backend/ -run '^(TestHardenProcess|TestMemoryIntegrity|TestIPCName|TestNodeUsageMachineLoadIsAShare)$' -count=1 -v
 
   # The hardened runtime on macOS (backend/harden_darwin_test.go): a copy
   # signed as the app is, tried for its task port as another program would
@@ -97,7 +98,7 @@ jobs:
           GOPRIVATE: github.com/ParallaxProtocol/*
           CGO_ENABLED: "1"
         run: |
-          go test ./backend/ -run '^TestHardenedRuntime$' -count=1 -v
+          go test ./backend/ -run '^(TestHardenedRuntime|TestNodeUsageMachineLoadIsAShare)$' -count=1 -v
           sudo -E env "PATH=$PATH" go test ./backend/ -run '^TestHardenedRuntime$' -count=1 -v
 
   # The whole end-to-end suite on macOS, as it runs on Linux: the real app
