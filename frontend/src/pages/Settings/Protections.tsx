@@ -1,12 +1,16 @@
 import { useEffect, useState, type ReactNode } from "react";
 import {
+  AlertTriangle,
   AppWindow,
+  Check,
   Cpu,
   Dices,
   EyeOff,
   HardDrive,
+  Info,
   LockKeyhole,
   MemoryStick,
+  Minus,
   Moon,
   PackageCheck,
   ScreenShareOff,
@@ -21,11 +25,21 @@ import { useAssistant } from "../../lib/assistantContext";
 import { useSettingsSheet } from "../../lib/settingsSheet";
 import { useT } from "../../i18n";
 import { Rows } from "../../components/ui/Panel";
-import { Pill } from "../../components/ui/Pill";
+import { Tooltip } from "../../components/ui/Tooltip";
 import type { Tone } from "../../components/ui/tone";
 import { OnionSymbol, SparklesSymbol } from "../../components/ui/symbols";
 
 type Status = { label: string; tone: Tone };
+
+/** The glyph each tone of status shows as, in its ink, its label in its tooltip. */
+const STATUS_GLYPH: Record<Tone, { icon: LucideIcon; ink: string }> = {
+  good: { icon: Check, ink: "text-good-ink" },
+  warn: { icon: AlertTriangle, ink: "text-warn-ink" },
+  critical: { icon: AlertTriangle, ink: "text-critical-ink" },
+  info: { icon: Info, ink: "text-info-ink" },
+  brand: { icon: Info, ink: "text-brand" },
+  neutral: { icon: Minus, ink: "text-muted-foreground" },
+};
 
 /**
  * Protections is Settings' account of what guards the wallet (Security)
@@ -220,6 +234,18 @@ export default function Protections({ kind }: { kind: "security" | "privacy" }) 
   );
 }
 
+/** StatusMark is a row's status as its mark, the label said on hover and to screen readers. */
+function StatusMark({ title, status }: { title: string; status: Status }) {
+  const { icon: Icon, ink } = STATUS_GLYPH[status.tone];
+  return (
+    <Tooltip content={status.label}>
+      <span role="img" aria-label={`${title}: ${status.label}`} className={`flex ${ink}`}>
+        <Icon className="size-5" aria-hidden />
+      </span>
+    </Tooltip>
+  );
+}
+
 /**
  * Protection is one row: its symbol, what it is and does, a note on how it
  * stands where it isn't fully on, and its status (none until it's known),
@@ -255,11 +281,7 @@ function Protection({
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {action}
-        {status && (
-          <Pill tone={status.tone} aria-label={`${title}: ${status.label}`}>
-            {status.label}
-          </Pill>
-        )}
+        {status && <StatusMark title={title} status={status} />}
       </div>
     </div>
   );
