@@ -1,4 +1,4 @@
-import { lazy, ReactNode, Suspense, useEffect, useState } from "react";
+import { lazy, ReactNode, Suspense, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   ChevronDown,
@@ -42,6 +42,11 @@ export const NODE_BAR_GAP = 12;
 /** The room the shell keeps at the window's foot for the floating bar. */
 export const NODE_BAR_ROOM = NODE_BAR_HEIGHT + 2 * NODE_BAR_GAP;
 
+/** The bar's spring, as it opens, closes and rises full; the assistant bar's too, so the two move as one. */
+export const BAR_SPRING = { type: "spring", bounce: 0, visualDuration: 0.35 } as const;
+/** The open panel following its page's height, a frame or two behind. */
+const FOLLOW = { type: "tween", duration: 0.12, ease: "easeOut" } as const;
+
 const STATE_GRADE: Record<ReturnType<typeof nodeState>, Grade> = {
   stopped: "off",
   syncing: "info",
@@ -72,7 +77,8 @@ function Swap({ swap, className = "", children }: { swap: string; className?: st
 
 export function NodeSheetProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
-  return <NodeSheetContext.Provider value={{ open, setOpen }}>{children}</NodeSheetContext.Provider>;
+  const [full, setFull] = useState(false);
+  return <NodeSheetContext.Provider value={{ open, setOpen, full, setFull }}>{children}</NodeSheetContext.Provider>;
 }
 
 export { useNodeSheet };
@@ -131,14 +137,15 @@ export function NodeSwitchProvider({ children }: { children: ReactNode }) {
  * a glance from every page (its state, the sync's progress, the best
  * block, peers and uptime) and its power switch, in a capsule as the
  * assistant bar beside it. Opened, it rises into a
- * floating panel up to the window's title bar and becomes the node's page,
+ * floating panel as tall as the node's page needs (up to the window's title
+ * bar, and all the way with the page's "More details") and becomes the page,
  * its bar staying on as the page's header; closed, it sinks back. Escape
  * closes it.
  */
 export default function NodeBar() {
   const t = useT();
   const node = useNode();
-  const { open, setOpen } = useNodeSheet();
+  const { open, setOpen, full } = useNodeSheet();
   const state = nodeState(node);
   const progress = syncProgress(node);
   const running = !!node?.running;
@@ -173,6 +180,30 @@ export default function NodeBar() {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+  // The page's own height, for the panel to rise only as far as it needs
+  const pageRef = useRef<HTMLDivElement>(null);
+  const [pageHeight, setPageHeight] = useState(0);
+  useEffect(() => {
+    const el = pageRef.current;
+    if (!open || !el) return;
+    const observer = new ResizeObserver(() => setPageHeight(Math.ceil(el.getBoundingClientRect().height)));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [open]);
+  // Under the title bar at most; the bar, the page and the panel's border (2px) otherwise
+  const tallest = Math.max(NODE_BAR_HEIGHT, vh - TOP_BAR_HEIGHT - NODE_BAR_GAP);
+  const openHeight = full ? tallest : Math.min(tallest, NODE_BAR_HEIGHT + pageHeight + 2);
+  // Opening, closing and rising full take the bar's spring; otherwise the
+  // panel follows the page as it grows and shrinks (a list unfolding, the
+  // details folding away), close behind it rather than chasing it with a
+  // spring restarted each frame
+  const shape = useRef({ open, full, springUntil: 0 });
+  if (shape.current.open !== open || (full && !shape.current.full)) {
+    shape.current.springUntil = performance.now() + 600;
+  }
+  shape.current.open = open;
+  shape.current.full = full;
+  const following = open && performance.now() > shape.current.springUntil;
   // The assistant bar sits at the right end of the foot: this bar keeps
   // clear of it, moving aside as it opens on a request. Opened into the
   // node's page it takes the whole width, the assistant bar stepping
@@ -213,10 +244,10 @@ export default function NodeBar() {
         // A capsule at rest, as the assistant bar; opened, a panel's corners
         animate={{
           right,
-          height: open ? Math.max(NODE_BAR_HEIGHT, vh - TOP_BAR_HEIGHT - NODE_BAR_GAP) : NODE_BAR_HEIGHT,
+          height: open ? openHeight : NODE_BAR_HEIGHT,
           borderRadius: open ? 16 : NODE_BAR_HEIGHT / 2,
         }}
-        transition={{ type: "spring", bounce: 0, visualDuration: 0.35 }}
+        transition={{ ...BAR_SPRING, height: following ? FOLLOW : BAR_SPRING }}
       >
         {/* The bar: a click anywhere on it opens the page, whose header it then is.
             Its buttons sit as far from the end as from the top and bottom,
@@ -437,9 +468,11 @@ export default function NodeBar() {
               animate={{ opacity: 1, y: 0, transition: { delay: 0.15, duration: 0.4, ease: [0.16, 1, 0.3, 1] } }}
               exit={{ opacity: 0, transition: { duration: 0.15 } }}
             >
-              <Suspense fallback={null}>
-                <NodePage />
-              </Suspense>
+              <div ref={pageRef}>
+                <Suspense fallback={null}>
+                  <NodePage />
+                </Suspense>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

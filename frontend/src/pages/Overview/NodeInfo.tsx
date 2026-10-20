@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Activity, ArrowDown, ArrowUp, ChevronDown, Cpu, HardDrive, MemoryStick, type LucideIcon } from "lucide-react";
 import { BlockView, NodeDetails, NodeStatus, PeerView } from "../../lib/api";
@@ -12,6 +12,7 @@ import { Sparkline } from "../../components/ui/Sparkline";
 import { useUsage } from "../../lib/usage";
 import { CopyButton } from "../../components/ui/bits";
 import { Tooltip } from "../../components/ui/Tooltip";
+import { useNodeSheet } from "../../lib/nodeSheet";
 
 /** Whether "More details" was left open, remembered per viewer. */
 const MORE_KEY = "parallax-node-more";
@@ -48,6 +49,14 @@ export default function NodeInfo({
   const [more, setMore] = useState(readMore);
   const usage = useUsage(node.running && more);
   const stagger = useStagger();
+  // The details shown, the node's panel rises all the way, as it would
+  // for them anyway; without them, only as far as the page needs
+  const { setFull } = useNodeSheet();
+  const shown = more && !!d?.running;
+  useEffect(() => {
+    setFull(shown);
+    return () => setFull(false);
+  }, [shown, setFull]);
 
   if (!d?.running) return null;
 

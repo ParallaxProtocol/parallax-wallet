@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useT } from "../../i18n";
 import { useAssistant } from "../../lib/assistantContext";
-import { NODE_BAR_GAP, NODE_BAR_HEIGHT, useNodeSheet } from "./NodeBar";
+import { BAR_SPRING, NODE_BAR_GAP, NODE_BAR_HEIGHT, useNodeSheet } from "./NodeBar";
 import { TOP_BAR_HEIGHT } from "./TopBar";
 import { RequestBody } from "./AssistantRequests";
 import { activityKey, REQUEST_ICON, requestTitle } from "../../lib/assistantRequests";
@@ -20,9 +20,6 @@ import { SENT_MS, type SentInfo } from "../../lib/assistantContext";
 import { Ticker } from "../ui/Ticker";
 import { api, type AssistantRequest, type MCPActivity, type MCPStatus } from "../../lib/api";
 import { BAR_FADE, BAR_GLASS, BAR_SURFACE } from "./barSurface";
-
-/** The node bar's spring, so the two bars move as one. */
-const BAR_SPRING = { type: "spring", bounce: 0, visualDuration: 0.35 } as const;
 
 /**
  * AssistantBar floats beside the node bar, at the window's foot, while AI
