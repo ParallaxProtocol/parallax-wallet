@@ -237,9 +237,7 @@ func TestHistoryExport(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer f.Close()
-	if info, _ := f.Stat(); info.Mode().Perm() != 0o600 {
-		t.Errorf("the export is %v, want private", info.Mode().Perm())
-	}
+	assertPrivate(t, path, 0o600)
 	recs, err := csv.NewReader(f).ReadAll()
 	if err != nil {
 		t.Fatal(err)

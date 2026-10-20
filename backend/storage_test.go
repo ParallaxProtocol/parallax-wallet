@@ -86,10 +86,7 @@ func TestCopyTreeKeepsFilesAndModes(t *testing.T) {
 	if err := sameTree(src, dst); err != nil {
 		t.Errorf("sameTree: %v", err)
 	}
-	info, err := os.Stat(filepath.Join(dst, "dir", "file"))
-	if err != nil || info.Mode().Perm() != 0o600 {
-		t.Errorf("copied file's mode = %v, %v; want 0600", info, err)
-	}
+	assertPrivate(t, filepath.Join(dst, "dir", "file"), 0o600)
 }
 
 func TestClearFreezerLeavesOtherFiles(t *testing.T) {

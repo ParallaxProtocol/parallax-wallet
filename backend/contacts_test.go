@@ -89,9 +89,7 @@ func TestContactsAddValidatesAndPersists(t *testing.T) {
 	if got := again.List(); len(got) != 1 || got[0] != k {
 		t.Fatalf("reopened = %+v, want just %+v", got, k)
 	}
-	if fi, err := os.Stat(filepath.Join(dir, sealedContacts)); err != nil || fi.Mode().Perm() != 0o600 {
-		t.Fatalf("%s = %v, %v; want it private to the user", sealedContacts, fi, err)
-	}
+	assertPrivate(t, filepath.Join(dir, sealedContacts), 0o600)
 	if data, _ := os.ReadFile(filepath.Join(dir, sealedContacts)); strings.Contains(string(data), "Alice") || strings.Contains(string(data), aliceAddr[2:]) {
 		t.Fatal("the contacts are kept in the clear")
 	}

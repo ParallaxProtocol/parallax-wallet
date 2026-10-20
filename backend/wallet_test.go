@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
@@ -33,6 +34,10 @@ func newBareWallet(t *testing.T) (*Wallet, string) {
 	if err != nil {
 		t.Fatalf("NewWallet: %v", err)
 	}
+	// Locked as the test ends, its protected memory let go: Windows locks
+	// only a little of a process's memory, which the wallets of the whole
+	// suite left unlocked use up
+	t.Cleanup(w.Lock)
 	return w, dir
 }
 
@@ -118,6 +123,11 @@ func assertPrivate(t *testing.T, path string, want os.FileMode) {
 	fi, err := os.Stat(path)
 	if err != nil {
 		t.Fatalf("stat %s: %v", path, err)
+	}
+	// Windows keeps no mode: a file is as private as its folder's access
+	// list, which it inherits, and Go says any it can write is 0666
+	if runtime.GOOS == "windows" {
+		return
 	}
 	if got := fi.Mode().Perm(); got&^want != 0 {
 		t.Errorf("%s has mode %o, want at most %o", path, got, want)

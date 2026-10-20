@@ -41,6 +41,15 @@ func persisted(t *testing.T, dir string, clear bool, pub *[32]byte) *LogTail {
 	if err := tail.SealTo(pub[:]); err != nil {
 		t.Fatal(err)
 	}
+	// Its file let go of as the test ends, which the tail itself never does
+	// (Close goes on capturing): Windows removes no file still open
+	t.Cleanup(func() {
+		tail.mu.Lock()
+		defer tail.mu.Unlock()
+		if tail.file != nil {
+			tail.file.f.Close()
+		}
+	})
 	return tail
 }
 

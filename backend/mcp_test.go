@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -132,9 +131,7 @@ func TestMCPServer(t *testing.T) {
 	if !st.Running || st.Error != "" || len(st.Token) != 64 {
 		t.Fatalf("status = %+v, want running with a token", st)
 	}
-	if fi, err := os.Stat(filepath.Join(dir, mcpTokenFile)); err != nil || fi.Mode().Perm() != 0o600 {
-		t.Fatalf("token file: %v %v", fi, err)
-	}
+	assertPrivate(t, filepath.Join(dir, mcpTokenFile), 0o600)
 
 	// The server comes up before the node and says why it can't answer
 	cs := connectMCP(t, st)
